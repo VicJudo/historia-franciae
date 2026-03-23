@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Récits — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-dim:#7A6230;--gold-faint:rgba(201,168,76,0.08);
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+}
+html{scroll-behavior:smooth}
+body{background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif;min-height:100vh}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.97);border-bottom:1px solid rgba(201,168,76,.18)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-links{display:flex;gap:1.5rem}
+.nav-link{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-link:hover{opacity:1;color:var(--gold)}
+
+/* READING PROGRESS */
+.read-progress{position:fixed;top:52px;left:0;right:0;height:2px;background:rgba(201,168,76,.08);z-index:195}
+.read-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));width:0%;transition:width .1s}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:260px 1fr 220px;min-height:100vh;padding-top:54px}
+@media(max-width:1100px){.layout{grid-template-columns:0 1fr 0}}
+
+/* LEFT: TABLE OF CONTENTS */
+.toc{position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;padding:1.5rem 1rem;border-right:1px solid rgba(201,168,76,.08);scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.15) transparent}
+.toc::-webkit-scrollbar{width:3px}
+.toc::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15)}
+.toc-title{font-family:'Cinzel',serif;font-size:8px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:1rem;opacity:.7}
+.toc-chapter{display:block;padding:.4rem .6rem;font-family:'EB Garamond',serif;font-size:13px;color:var(--parchment-dim);opacity:.6;text-decoration:none;border-left:2px solid transparent;transition:all .2s;line-height:1.35;margin-bottom:.15rem}
+.toc-chapter:hover{opacity:1;color:var(--parchment);border-left-color:rgba(201,168,76,.3)}
+.toc-chapter.active{opacity:1;color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,.04)}
+.toc-era{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--gold-dim);opacity:.5;margin:1rem 0 .3rem .6rem}
+
+/* CENTER: STORY CONTENT */
+.story-main{padding:4rem 3rem;max-width:780px;margin:0 auto}
+@media(max-width:800px){.story-main{padding:3rem 1.5rem}}
+
+/* BOOK OPENING */
+.book-hero{text-align:center;padding:5rem 2rem 4rem;border-bottom:1px solid rgba(201,168,76,.1);margin-bottom:5rem;position:relative}
+.book-hero::after{content:'⚜';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:1.5rem;color:var(--gold-dim);background:var(--stone);padding:0 .5rem;opacity:.6}
+.book-ornament{font-size:3rem;opacity:.25;margin-bottom:1.5rem;display:block}
+.book-title{font-family:'Cinzel',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;color:var(--parchment);line-height:.92;margin-bottom:.75rem}
+.book-title span{color:var(--gold);display:block}
+.book-subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.3rem;color:var(--parchment-dim);opacity:.7;margin-bottom:2rem}
+.book-dates{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.3em;color:var(--gold-dim);opacity:.7}
+
+/* CHAPTER BLOCK */
+.story-chapter{margin-bottom:6rem;scroll-margin-top:80px}
+.chapter-header{margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid rgba(201,168,76,.08)}
+.chapter-era-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:5px;color:var(--gold-dim);display:block;margin-bottom:.5rem;opacity:.7}
+.chapter-number{font-family:'Cinzel',serif;font-size:4rem;font-weight:900;color:var(--gold-dim);opacity:.12;line-height:1;margin-bottom:.25rem}
+.chapter-title{font-family:'Cinzel',serif;font-size:clamp(1.4rem,3.5vw,2.2rem);font-weight:700;color:var(--parchment);line-height:1.1;margin-bottom:.5rem}
+.chapter-dates{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-dim);opacity:.6}
+
+/* PROSE */
+.prose{font-size:1.05rem;line-height:1.95;color:var(--parchment-dim)}
+.prose p{margin-bottom:1.5rem}
+.prose p:first-child::first-letter{font-family:'Cinzel',serif;font-size:3.5rem;font-weight:900;color:var(--gold);float:left;line-height:.8;margin:.1rem .12rem 0 0;padding:.1rem .05rem 0}
+.prose strong{color:var(--parchment);font-weight:500}
+.prose em{color:var(--gold-dim);font-style:italic}
+
+/* PULL QUOTE */
+.pull-quote{margin:2.5rem 0;padding:1.5rem 2rem;border-left:3px solid rgba(201,168,76,.35);background:rgba(201,168,76,.04);position:relative}
+.pull-quote::before{content:'❝';position:absolute;top:.5rem;left:.75rem;font-size:1.5rem;color:var(--gold-dim);opacity:.4;font-family:serif}
+.pull-quote-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;color:var(--parchment);line-height:1.6;margin-bottom:.5rem;padding-left:.5rem}
+.pull-quote-attr{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);opacity:.7}
+
+/* FACT BOX */
+.fact-box{margin:2rem 0;padding:1rem 1.25rem;background:var(--stone-card);border:1px solid rgba(201,168,76,.12);border-top:2px solid rgba(201,168,76,.35)}
+.fact-box-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.6rem}
+.fact-box-list{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.fact-box-list li{font-size:14px;color:var(--parchment-dim);line-height:1.5;padding-left:1rem;position:relative}
+.fact-box-list li::before{content:'◆';position:absolute;left:0;color:var(--gold-dim);font-size:7px;top:.4rem}
+
+/* PERSON INLINE */
+.person-inline{display:inline-flex;align-items:center;gap:.3rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.15);padding:.1rem .4rem;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--gold-dim);font-style:normal}
+.person-inline:hover{background:rgba(201,168,76,.14);border-color:rgba(201,168,76,.35);color:var(--gold)}
+
+/* BATTLE INLINE */
+.battle-inline{display:inline;color:rgba(192,64,48,.8);font-style:italic;cursor:pointer;border-bottom:1px dotted rgba(192,64,48,.4);transition:color .2s}
+.battle-inline:hover{color:#E07060}
+
+/* CHAPTER DIVIDER */
+.chapter-divider{text-align:center;margin:4rem 0;display:flex;align-items:center;gap:1.5rem}
+.chapter-divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.2),transparent)}
+.chapter-divider-ornament{font-size:1.2rem;color:var(--gold-dim);opacity:.4}
+
+/* VIE QUOTIDIENNE CARD */
+.vie-card{margin:2rem 0;background:var(--stone-light);border:1px solid rgba(201,168,76,.1);overflow:hidden}
+.vie-card-header{padding:.6rem 1rem;background:rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.1);font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim)}
+.vie-card-body{padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:600px){.vie-card-body{grid-template-columns:1fr}}
+.vie-item-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);margin-bottom:.3rem}
+.vie-item-text{font-size:13px;color:var(--parchment-dim);line-height:1.5}
+
+/* RIGHT: CONTEXTUAL SIDEBAR */
+.context-sidebar{position:sticky;top:54px;height:calc(100vh - 54px);overflow-y:auto;padding:1.5rem 1rem;border-left:1px solid rgba(201,168,76,.08);scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.15) transparent}
+.context-sidebar::-webkit-scrollbar{width:3px}
+.context-sidebar::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15)}
+.ctx-title{font-family:'Cinzel',serif;font-size:8px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:.75rem;opacity:.7}
+.ctx-section{margin-bottom:1.5rem}
+.ctx-item{padding:.5rem .6rem;margin-bottom:.3rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.07);cursor:pointer;text-decoration:none;color:inherit;display:block;transition:all .2s}
+.ctx-item:hover{border-color:rgba(201,168,76,.25);background:rgba(201,168,76,.08)}
+.ctx-item-name{font-family:'Cinzel',serif;font-size:9px;color:var(--parchment);display:block;margin-bottom:1px}
+.ctx-item-meta{font-size:11px;color:var(--parchment-dim);opacity:.55}
+
+/* CHAPTER NAV (bottom) */
+.chapter-nav{display:flex;justify-content:space-between;align-items:center;margin-top:4rem;padding-top:2rem;border-top:1px solid rgba(201,168,76,.1)}
+.cnav-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:.6rem 1rem;border:1px solid rgba(201,168,76,.2);color:var(--gold-dim);background:transparent;cursor:pointer;text-decoration:none;transition:all .2s}
+.cnav-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cnav-center{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);opacity:.4}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <div class="nav-links">
+    <a href="frise.html" class="nav-link">Frise</a>
+    <a href="personnages.html" class="nav-link">Personnages</a>
+    <a href="cartes.html" class="nav-link">Cartes</a>
+  </div>
+</nav>
+
+<div class="read-progress"><div class="read-progress-fill" id="readProgress"></div></div>
+
+<div class="layout">
+
+  <!-- LEFT TOC -->
+  <nav class="toc" id="toc">
+    <div class="toc-title">TABLE DES MATIÈRES</div>
+  </nav>
+
+  <!-- CENTER STORY -->
+  <main class="story-main" id="storyMain">
+
+    <!-- Book opening -->
+    <div class="book-hero">
+      <span class="book-ornament">⚜</span>
+      <h1 class="book-title">L'Histoire<br><span>de France</span></h1>
+      <p class="book-subtitle">De Clovis à De Gaulle — quinze siècles en récit</p>
+      <div class="book-dates">481 après J.-C. &nbsp;—&nbsp; 1969</div>
+    </div>
+
+    <!-- Chapters injected here -->
+    <div id="chaptersContainer"></div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="context-sidebar" id="contextSidebar">
+    <div class="ctx-title">DANS CE CHAPITRE</div>
+    <div id="sidebarContent"></div>
+  </aside>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+// ── STORY CHAPTERS ──
+const STORY_CHAPTERS = [
+  {
+    id: 'naissance-france',
+    era: 'LES MÉROVINGIENS',
+    num: 'I',
+    title: 'La naissance d\'un royaume',
+    dates: '481 – 751',
+    dynastieId: 'merovingiens',
+    rois: ['clovis-1','dagobert-1'],
+    batailles: ['tolbiac','vouille'],
+    periodes: [],
+    prose: [
+      `En l'an 481, un jeune chef franc de quinze ans monte sur le trône du royaume de Tournai. Il s'appelle <a href="roi.html?id=clovis-1" class="person-inline">👑 Clovis Ier</a>. Nul ne sait encore qu'il va façonner, en trente ans de règne, les contours d'un pays qui se nommera un jour la France.`,
+      `Les Francs sont alors l'un des nombreux peuples germaniques installés dans l'ancienne Gaule romaine. Clovis va les unifier par l'épée et par la foi. En 486, il défait <em>Syagrius</em>, le dernier gouverneur romain des Gaules. Dix ans plus tard, la victoire sur les Alamans lors de la <span class="battle-inline" title="Tolbiac, 496 — Victoire contre les Alamans">bataille de Tolbiac</span> le conduit à un acte décisif : son baptême.`,
+      `La légende rapporte que, voyant ses guerriers reculer, Clovis implora le "Dieu de Clotilde", sa femme chrétienne. La victoire suivit. Vers 498, saint Remi le baptise à Reims avec trois mille de ses guerriers. La France devient la <strong>« fille aînée de l'Église »</strong> — un titre qu'elle portera quinze siècles.`,
+    ],
+    quote: { text: "Je veillerai sur toi, je te ferai triompher de tes ennemis.", attr: "Promesse prêtée à Dieu par Clovis avant Tolbiac, selon Grégoire de Tours" },
+    facts: ["Baptême de Clovis vers 498 — premier roi chrétien de France","Victoire sur les Wisigoths à Vouillé (507) — la Gaule méridionale intégrée","Paris devient capitale du royaume franc","La Loi Salique codifie le droit germanique"],
+    vie: { titre: "Vie sous les Mérovingiens", items: [
+      { t:"Agriculture", c:"Paysannerie servile, domaines monastiques, défrichements progressifs." },
+      { t:"Religion", c:"Christianisation rapide. Les évêques deviennent des puissances politiques." },
+      { t:"Commerce", c:"Déclin du commerce romain. Troc, échanges locaux, pèlerinages." },
+      { t:"Art", c:"Art animalier, fibules dorées, enluminures des premiers manuscrits chrétiens." },
+    ]}
+  },
+  {
+    id: 'charlemagne',
+    era: 'LES CAROLINGIENS',
+    num: 'II',
+    title: 'L\'Empire de Charlemagne',
+    dates: '768 – 843',
+    dynastieId: 'carolingiens',
+    rois: ['charlemagne','louis-pieux','charles-chauve'],
+    batailles: ['roncevaux'],
+    periodes: ['empire_carolingien'],
+    prose: [
+      `Le 25 décembre 800, dans la basilique Saint-Pierre de Rome, le pape Léon III pose une couronne sur la tête d'un homme immense — presque deux mètres — qui n'avait pas demandé cet honneur, ou du moins prétendait ne pas l'avoir voulu. <a href="roi.html?id=charlemagne" class="person-inline">⚜ Charlemagne</a> devient Empereur d'Occident. L'Empire romain renaît après trois siècles d'absence.`,
+      `En quarante-six ans de règne, Charlemagne mène cinquante-trois campagnes militaires. Il soumet les Saxons après trente ans de guerre acharnée, convertit les Avars, protège la papauté, pénètre en Espagne. Son empire s'étend de l'Atlantique à l'Elbe, de la mer du Nord à l'Italie centrale. Jamais depuis Rome l'Europe occidentale n'aura connu pareille unité.`,
+      `Mais Charlemagne n'est pas seulement un conquérant. Depuis son palais d'<strong>Aix-la-Chapelle</strong>, il réforme l'écriture (la minuscule carolingienne), crée des écoles, unifie la monnaie et les poids. <em>Alcuin d'York</em>, son conseiller intellectuel, préside l'École palatine. C'est la "Renaissance carolingienne" — une lumière dans les ténèbres du haut Moyen Âge.`,
+      `Après sa mort en 814, l'empire se fracture. Son fils Louis le Pieux ne peut contenir les ambitions de ses propres fils. En 843, le <strong>traité de Verdun</strong> divise l'empire en trois : à l'est la future Allemagne, à l'ouest la future France, au centre la Lotharingie disputée. L'Europe moderne prend forme.`,
+    ],
+    quote: { text: "Que nul ne soit trop pauvre pour ne pas savoir lire et écrire.", attr: "Charlemagne, Capitulaire de 802 (selon la tradition)" },
+    facts: ["Couronnement impérial le 25 décembre 800 à Rome","Empire s'étend de l'Espagne du Nord à l'Elbe","Réforme scolaire : l'École palatine et Alcuin","Traité de Verdun (843) : naissance de la France et de l'Allemagne"],
+    vie: { titre: "Vie sous les Carolingiens", items: [
+      { t:"Éducation", c:"Charlemagne ordonne la création d'écoles dans chaque monastère et cathédrale." },
+      { t:"Économie", c:"Réforme monétaire. Le denier d'argent s'impose. Marchés réguliers." },
+      { t:"Armée", c:"Cavalerie lourde. Service militaire dû au roi. Premières forteresses." },
+      { t:"Écriture", c:"La minuscule carolingienne facilite la copie des textes anciens." },
+    ]}
+  },
+  {
+    id: 'capetiens-grandeur',
+    era: 'LES CAPÉTIENS',
+    num: 'III',
+    title: 'La France des Capétiens',
+    dates: '987 – 1328',
+    dynastieId: 'capetiens',
+    rois: ['hugues-capet','philippe-2','louis-9','philippe-4'],
+    batailles: ['bouvines'],
+    periodes: [],
+    prose: [
+      `En 987, les grands seigneurs du royaume élisent roi un homme prudent, le duc des Francs <a href="roi.html?id=hugues-capet" class="person-inline">👑 Hugues Capet</a>. Son domaine direct ? À peine l'Île-de-France, quelques châteaux entre Paris et Orléans. Les grands féodaux — duc de Normandie, comte de Flandre, duc d'Aquitaine — sont bien plus puissants que lui. Personne ne parie sur la durée de sa lignée. Elle régnera trois siècles.`,
+      `C'est <a href="roi.html?id=philippe-2" class="person-inline">⚜ Philippe Auguste</a> qui transforme tout. En quarante ans de règne (1180–1223), il triple le domaine royal. Il arrache la Normandie, l'Anjou, le Poitou aux Plantagenêts anglais. Et le 27 juillet 1214, il remporte la <span class="battle-inline" title="Bouvines, 1214 — Victoire décisive sur la coalition européenne">bataille de Bouvines</span> contre une coalition qui réunit l'Empire germanique, l'Angleterre et la Flandre. C'est la première grande victoire nationale de la France.`,
+      `Le règne de <a href="roi.html?id=louis-9" class="person-inline">✝ Saint Louis</a> (1226–1270) représente l'idéal médiéval porté à son sommet. Ce roi juste rend la justice sous un chêne à Vincennes, interdit les guerres privées, réforme la monnaie, fonde la Sainte-Chapelle pour abriter la Couronne d'épines. Il part deux fois en croisade — sera capturé en Égypte, mourra devant Tunis. Canonisé en 1297, il est le seul roi de France à être saint.`,
+      `<a href="roi.html?id=philippe-4" class="person-inline">👑 Philippe le Bel</a> est d'une autre trempe. Froid, calculateur, il n'hésite pas à humilier le pape Boniface VIII — c'est la "gifle d'Anagni" (1303) — ni à détruire l'ordre du Temple pour s'emparer de ses richesses (1307). Ses trois fils mourront sans héritier mâle. La malédiction du Grand Maître Jacques de Molay, brûlé vif, hantera la mémoire médiévale.`,
+    ],
+    quote: { text: "Je suis roi de France, mais saint Louis fut le plus grand.", attr: "Attribué à Henri IV" },
+    facts: ["Hugues Capet élu roi en 987 — début de la plus longue dynastie","Philippe Auguste triple le domaine royal en 40 ans","Bouvines (1214) — premier sentiment national français","Saint Louis — seul roi canonisé de France","Philippe le Bel détruit l'ordre du Temple (1307)"],
+    vie: { titre: "Vie au Moyen Âge capétien", items: [
+      { t:"Cathédrales", c:"Explosion de l'art gothique. Notre-Dame de Paris (1163), Chartres, Reims." },
+      { t:"Université", c:"Fondation de l'Université de Paris (1200). La Sorbonne en 1257." },
+      { t:"Paysannerie", c:"80% de la population. Servage en déclin. Essor des villes et des communes." },
+      { t:"Croisades", c:"Sept croisades (1096–1270). Échanges commerciaux et culturels avec l'Orient." },
+    ]}
+  },
+  {
+    id: 'guerre-cent-ans',
+    era: 'LES VALOIS — GUERRE DE CENT ANS',
+    num: 'IV',
+    title: 'La Guerre de Cent Ans',
+    dates: '1337 – 1453',
+    dynastieId: 'valois',
+    rois: ['charles-5','charles-6','charles-7'],
+    batailles: ['crecy','poitiers','azincourt','orleans','castillon'],
+    periodes: ['guerre_cent_ans'],
+    prose: [
+      `La mort de <a href="roi.html?id=charles-4" class="person-inline">👑 Charles IV</a> en 1328 sans héritier mâle ouvre une crise dynastique. Édouard III d'Angleterre, petit-fils de Philippe le Bel par sa mère, revendique la couronne. La loi salique l'en empêche. La guerre commence. Elle durera cent seize ans.`,
+      `Les premières décennies sont catastrophiques pour la France. <span class="battle-inline" title="Crécy, 1346 — Désastre de la chevalerie française">Crécy (1346)</span>, <span class="battle-inline" title="Poitiers, 1356 — Jean le Bon capturé">Poitiers (1356)</span> où le roi Jean II est capturé, puis la Peste Noire qui emporte un tiers de la population... La France titube. Mais le sage <a href="roi.html?id=charles-5" class="person-inline">👑 Charles V</a> et son connétable Du Guesclin opèrent un redressement remarquable : ils reconquièrent méthodiquement les territoires perdus, sans affronter la chevalerie anglaise en rase campagne.`,
+      `La rechute est brutale. <span class="battle-inline" title="Azincourt, 1415 — Désastre absolu">Azincourt (1415)</span> : 6 000 Anglais épuisés massacrent 15 000 Français. La noblesse française est décimée. Le traité de Troyes (1420) donne la couronne de France au roi d'Angleterre. <a href="roi.html?id=charles-7" class="person-inline">⚜ Charles VII</a>, surnommé "le roi de Bourges", ne tient plus que le centre du pays.`,
+      `C'est alors qu'apparaît <a href="personnages.html" class="person-inline">⚔ Jeanne d'Arc</a>. Cette paysanne lorraine de dix-sept ans, conduite par ses "voix", se présente au roi, obtient une armée, lève le siège d'Orléans en mai 1429. Le roi est sacré à Reims. La France reprend confiance. Capturée, jugée, brûlée à Rouen en 1431 sans que Charles intervienne, elle restera le symbole éternel de la résistance française. La victoire de <span class="battle-inline" title="Castillon, 1453 — Dernière bataille de la Guerre de Cent Ans">Castillon (1453)</span> met fin à la guerre. Seul Calais reste anglais.`,
+    ],
+    quote: { text: "J'ai été envoyée de par Dieu pour bouter les Anglais hors de toute la France.", attr: "Jeanne d'Arc, lors de son procès (1431)" },
+    facts: ["Crécy (1346) : les archers gallois déciment la chevalerie","Azincourt (1415) : 10 000 nobles français tués ou capturés","Jeanne d'Arc lève le siège d'Orléans (mai 1429)","Sacre de Charles VII à Reims (juillet 1429)","Castillon (1453) : fin de la Guerre de Cent Ans"],
+    vie: { titre: "Vie pendant la Guerre de Cent Ans", items: [
+      { t:"Peste Noire", c:"1347–1352 : un tiers à la moitié de la population européenne emportée." },
+      { t:"Jacquerie", c:"Soulèvement paysan de 1358 — misère, pillages, répression sanglante." },
+      { t:"Armée", c:"Transition : de la chevalerie aux compagnies de mercenaires puis à l'armée permanente." },
+      { t:"Art", c:"Art macabre, danses de la mort. Mais aussi : les Très Riches Heures du duc de Berry." },
+    ]}
+  },
+  {
+    id: 'renaissance-bourbons',
+    era: 'RENAISSANCE & GUERRES DE RELIGION',
+    num: 'V',
+    title: 'La Renaissance et les guerres de Religion',
+    dates: '1515 – 1598',
+    dynastieId: 'valois',
+    rois: ['francois-1','henri-4'],
+    batailles: ['marignan','pavie','ivry'],
+    periodes: ['guerres_religion'],
+    prose: [
+      `Le 14 septembre 1515, deux semaines après son sacre, <a href="roi.html?id=francois-1" class="person-inline">⚜ François Ier</a> remporte la bataille de <span class="battle-inline" title="Marignan, 1515 — Reconquête du Milanais">Marignan</span> sur les Suisses. "Je suis roi, je suis vainqueur, je suis en vie !" Le jeune roi commence le plus beau règne de la Renaissance française. Léonard de Vinci vient mourir à Amboise à son invitation. Chambord, Fontainebleau, le Louvre se transforment. L'Edit de Villers-Cotterêts (1539) impose le français comme langue officielle des actes du royaume.`,
+      `Mais la Réforme protestante gronde. Calvin s'installe à Genève. Les Huguenots gagnent une partie de la noblesse française. Après la mort de <a href="roi.html?id=henri-2" class="person-inline">👑 Henri II</a>, tué dans un tournoi en 1559, ses trois fils se succèdent sur un trône affaibli. La nuit du 23 au 24 août 1572, c'est la <strong>Saint-Barthélemy</strong> : sur ordre de <a href="personnages.html" class="person-inline">📜 Catherine de Médicis</a>, les chefs protestants réunis à Paris pour un mariage sont massacrés. Le carnage s'étend à toute la France : entre 3 000 et 30 000 morts.`,
+      `La France est à bout. <a href="roi.html?id=henri-3" class="person-inline">👑 Henri III</a>, le dernier Valois, fait assassiner les chefs de la Ligue catholique, les frères Guise — et est lui-même poignardé par un moine en 1589. Il désigne pour successeur le roi protestant de Navarre, <a href="roi.html?id=henri-4" class="person-inline">⚜ Henri IV</a>. Celui-ci abjure ("Paris vaut bien une messe"), est sacré, et signe en 1598 l'<strong>Édit de Nantes</strong> qui accorde la liberté de culte aux protestants. Après 36 ans de guerre civile, la paix revient.`,
+    ],
+    quote: { text: "Paris vaut bien une messe.", attr: "Henri IV (attribué), 1593" },
+    facts: ["Marignan (1515) — 'victoire des victoires' de François Ier","Édit de Villers-Cotterêts (1539) — le français langue officielle","Saint-Barthélemy (24 août 1572) — massacre des protestants","Henri III assassiné (1589) — fin des Valois","Édit de Nantes (1598) — liberté de culte protestante"],
+    vie: { titre: "Vie à la Renaissance", items: [
+      { t:"Arts", c:"Léonard de Vinci à Amboise. Ronsard, du Bellay. Rabelais, Montaigne." },
+      { t:"Architecture", c:"Châteaux de la Loire. Style franco-italien. Jardins à la française." },
+      { t:"Imprimerie", c:"Gutenberg avait imprimé sa Bible en 1455. Les idées circulent désormais." },
+      { t:"Religion", c:"Guerres de Religion : 8 conflits, 3 millions de morts estimés entre 1562 et 1598." },
+    ]}
+  },
+  {
+    id: 'louis-xiv',
+    era: 'LES BOURBONS — LE GRAND SIÈCLE',
+    num: 'VI',
+    title: 'Le Roi-Soleil',
+    dates: '1643 – 1715',
+    dynastieId: 'bourbons',
+    rois: ['louis-14'],
+    batailles: ['rocroi'],
+    periodes: [],
+    prose: [
+      `Il a cinq ans quand il monte sur le trône, soixante-dix-sept quand il en descend. <a href="roi.html?id=louis-14" class="person-inline">☀ Louis XIV</a> règne soixante-douze ans — le plus long règne de l'histoire française. Sa devise : <em>Nec pluribus impar</em> ("Je ne suis inférieur à personne"). Son emblème : le soleil. Son œuvre : un État centralisé, une culture dominante, et un château qui est la huitième merveille du monde.`,
+      `À la mort de Mazarin en 1661, Louis XIV a vingt-deux ans et une certitude : il gouvernera seul. "L'État, c'est moi" — la phrase est peut-être apocryphe, mais elle résume tout. Il s'entoure de <a href="personnages.html" class="person-inline">📜 Colbert</a> pour les finances et le commerce, de <a href="personnages.html" class="person-inline">🏰 Vauban</a> pour les fortifications, de Louvois pour l'armée. La France devient la première puissance européenne.`,
+      `<strong>Versailles</strong> s'édifie en trente ans. Dix mille ouvriers, trente-six mille hommes au pic des travaux. Le château devient le centre du monde — tous les rois d'Europe l'imitent. Molière, Racine, Corneille, La Fontaine, Lully : c'est le Grand Siècle, et il rayonne depuis Versailles.`,
+      `L'envers du décor est sombre. Des guerres incessantes — Hollande, Ligue d'Augsbourg, Succession d'Espagne — épuisent le royaume et vidant les caisses. La révocation de l'Édit de Nantes en 1685 chasse 200 000 protestants, artisans et marchands parmi les plus productifs. Louis XIV meurt en 1715 en laissant un arrière-petit-fils de cinq ans sur le trône et un trésor vide.`,
+    ],
+    quote: { text: "J'ai trop aimé la guerre.", attr: "Louis XIV sur son lit de mort, à son arrière-petit-fils (1715)" },
+    facts: ["Rocroi (1643) — Condé à 21 ans, fin de la supériorité espagnole","Construction de Versailles (1661–1710)","Révocation de l'Édit de Nantes (1685) — exode protestant","4 guerres majeures en 54 ans de règne personnel","Mort en 1715 après 72 ans de règne"],
+    vie: { titre: "Vie au Grand Siècle", items: [
+      { t:"Versailles", c:"10 000 courtisans vivent au palais ou dans la ville. Étiquette draconienne." },
+      { t:"Paysannerie", c:"95% de la population. Famines récurrentes. La Dîme royale de Vauban dénonce les inégalités." },
+      { t:"Culture", c:"Molière, Racine, Corneille, La Fontaine, Bossuet — le français s'impose en Europe." },
+      { t:"Commerce", c:"Manufactures royales (Gobelins, Sèvres). Compagnie des Indes. Canal du Midi." },
+    ]}
+  },
+  {
+    id: 'revolution',
+    era: 'LA RÉVOLUTION & L\'EMPIRE',
+    num: 'VII',
+    title: 'La Révolution et Napoléon',
+    dates: '1789 – 1815',
+    dynastieId: 'empire1',
+    rois: ['louis-16','napoleon-1'],
+    batailles: ['austerlitz','waterloo'],
+    periodes: ['revolution','guerres_napoleon'],
+    prose: [
+      `Le 5 mai 1789, <a href="roi.html?id=louis-16" class="person-inline">✝ Louis XVI</a> ouvre les États généraux à Versailles. Il cherche des impôts. Il va déclencher une révolution. Le Tiers État (97% de la population), las des privilèges de la noblesse et du clergé, prête le Serment du Jeu de Paume et se proclame Assemblée nationale. Le 14 juillet, la foule prend la Bastille. L'Ancien Régime agonise.`,
+      `En trois ans, la France abolit le féodalisme, proclame la Déclaration des Droits de l'Homme, adopte une Constitution. Mais la fuite du roi à Varennes (juin 1791) brise la confiance. La guerre contre l'Europe coalisée commence. La République est proclamée. Et le 21 janvier 1793, Louis XVI est guillotiné place de la Révolution. La monarchie millénaire est morte.`,
+      `La <strong>Terreur</strong> suit : le Comité de Salut Public, dirigé par <a href="personnages.html" class="person-inline">🗡 Robespierre</a>, envoie 40 000 personnes à l'échafaud avant d'y finir lui-même en juillet 1794. Puis vient le Directoire, instable et corrompu. Et le 9 novembre 1799, un général de trente ans réalise son coup d'État : <a href="roi.html?id=napoleon-1" class="person-inline">⚜ Napoléon Bonaparte</a>.`,
+      `En quinze ans, Napoléon réécrit la carte de l'Europe. Le Code civil, la Légion d'honneur, les lycées, le baccalauréat — ses réformes structurent la France jusqu'à aujourd'hui. Ses victoires — <span class="battle-inline" title="Austerlitz, 2 décembre 1805 — La plus grande victoire de Napoléon">Austerlitz (1805)</span>, Iéna, Wagram — éblouissent. Mais la campagne de Russie (1812) est une catastrophe. <span class="battle-inline" title="Waterloo, 18 juin 1815 — La défaite finale">Waterloo (1815)</span> est la fin. Exilé à Sainte-Hélène, il y meurt en 1821 en dictant sa légende.`,
+    ],
+    quote: { text: "La France, l'armée, Joséphine.", attr: "Derniers mots de Napoléon, Sainte-Hélène, 5 mai 1821" },
+    facts: ["Prise de la Bastille — 14 juillet 1789","Déclaration des Droits de l'Homme (août 1789)","Exécution de Louis XVI — 21 janvier 1793","Code civil napoléonien (1804) — toujours en vigueur","Austerlitz (1805) — apogée de la gloire","Waterloo (1815) — fin de l'épopée"],
+    vie: { titre: "Vie sous la Révolution et l'Empire", items: [
+      { t:"Citoyenneté", c:"Suffrage universel masculin (1792). La notion de 'citoyen' naît de la Révolution." },
+      { t:"Calendrier", c:"La Révolution invente un nouveau calendrier (Vendémiaire, Brumaire…) abandonné en 1806." },
+      { t:"Grande Armée", c:"600 000 hommes en Russie (1812). Service militaire universel. Gloire et boucherie." },
+      { t:"Éducation", c:"Napoléon crée les lycées (1802) et le baccalauréat — toujours en place." },
+    ]}
+  },
+  {
+    id: 'republiques',
+    era: 'LES RÉPUBLIQUES & DE GAULLE',
+    num: 'VIII',
+    title: 'La France contemporaine',
+    dates: '1870 – 1969',
+    dynastieId: 'republique5',
+    rois: ['napoleon-3','de-gaulle'],
+    batailles: ['sedan','verdun','marne_1914'],
+    periodes: [],
+    prose: [
+      `Le 2 septembre 1870, <a href="roi.html?id=napoleon-3" class="person-inline">👑 Napoléon III</a> capitule à Sedan avec 100 000 hommes face à la Prusse. C'est la fin du Second Empire. La IIIe République naît deux jours plus tard, dans la douleur : Paris est assiégé, l'Alsace-Lorraine sera perdue. Mais la République tient. Elle durera soixante-dix ans, traversant l'Affaire Dreyfus, la Loi de séparation de l'Église et de l'État (1905), et la Grande Guerre.`,
+      `<span class="battle-inline" title="Verdun, 1916 — 300 000 morts en 10 mois">Verdun (1916)</span>. Dix mois de bataille pour quelques kilomètres de boue. 300 000 morts. La France y saigne mais tient. <em>"Ils ne passeront pas."</em> La victoire de 1918 récupère l'Alsace-Lorraine mais laisse un pays épuisé, traumatisé, qui vouloir la paix à tout prix — ce qui facilitera la montée d'Hitler.`,
+      `Le 18 juin 1940, depuis la BBC à Londres, un général de brigade quasi inconnu lance un appel. <a href="roi.html?id=de-gaulle" class="person-inline">🎖 Charles de Gaulle</a> : "La France a perdu une bataille. Mais la France n'a pas perdu la guerre !" Pendant quatre ans, il incarne la France Libre face à l'<em>État français</em> de Pétain qui collabore avec l'Allemagne nazie. Le 26 août 1944, il défile sur les Champs-Élysées. Paris est libre.`,
+      `De Gaulle fonde la Ve République en 1958 sur de nouvelles bases : un président fort, élu au suffrage universel. Il négocie l'indépendance de l'Algérie (1962), retire la France de l'OTAN (1966), proclame "Vive le Québec libre !" (1967). Mai 68 le secoue mais ne le renverse pas. Il choisit de partir en 1969, après un référendum perdu. Il meurt en 1970, à Colombey-les-Deux-Églises, devant sa table de travail. L'histoire de France — de Clovis à De Gaulle — se referme sur elle-même.`,
+    ],
+    quote: { text: "La France ne peut être la France sans la grandeur.", attr: "Charles de Gaulle, Mémoires de guerre, 1954" },
+    facts: ["Sedan (1870) — perte de l'Alsace-Lorraine","Verdun (1916) — 300 000 morts, symbole de résistance","Appel du 18 juin 1940 depuis la BBC","Libération de Paris — 25 août 1944","Ve République fondée (1958)","Indépendance de l'Algérie (1962)","Démission de De Gaulle (1969)"],
+    vie: { titre: "Vie en France contemporaine", items: [
+      { t:"Laïcité", c:"Loi de 1905. L'État français est laïque — séparation complète de l'Église et de l'État." },
+      { t:"Deux guerres", c:"1914–1918 : 1,4 million de morts. 1939–1945 : 600 000 morts. Traumatisme durable." },
+      { t:"Trente Glorieuses", c:"1945–1975 : croissance exceptionnelle, modernisation, baby-boom, consommation de masse." },
+      { t:"Culture", c:"Existentialisme (Sartre, Camus), Nouvelle Vague (Godard, Truffaut), Mai 68." },
+    ]}
+  },
+];
+
+// ── BUILD TOC ──
+function buildTOC(){
+  const toc = document.getElementById('toc');
+  STORY_CHAPTERS.forEach(c=>{
+    const era = document.createElement('div');
+    era.className='toc-era';
+    era.textContent=c.era;
+    toc.appendChild(era);
+    const link = document.createElement('a');
+    link.className='toc-chapter';
+    link.href='#'+c.id;
+    link.innerHTML=`${c.num}. ${c.title}`;
+    link.dataset.id=c.id;
+    toc.appendChild(link);
+  });
+}
+
+// ── BUILD CHAPTERS ──
+function buildChapters(){
+  const container = document.getElementById('chaptersContainer');
+  STORY_CHAPTERS.forEach((c,idx)=>{
+    const dyn = HISTORIA.dynasties.find(d=>d.id===c.dynastieId);
+    const col = dyn ? dyn.couleur : '#C9A84C';
+
+    const proseHTML = c.prose.map((p,i)=>`<p>${p}</p>`).join('');
+    const factsHTML = c.facts.map(f=>`<li>${f}</li>`).join('');
+    const vieHTML = c.vie ? `
+      <div class="vie-card">
+        <div class="vie-card-header">VIE QUOTIDIENNE — ${c.vie.titre.toUpperCase()}</div>
+        <div class="vie-card-body">
+          ${c.vie.items.map(i=>`<div><div class="vie-item-title">${i.t.toUpperCase()}</div><p class="vie-item-text">${i.c}</p></div>`).join('')}
+        </div>
+      </div>` : '';
+
+    const divider = idx < STORY_CHAPTERS.length-1 ? `
+      <div class="chapter-divider">
+        <div class="chapter-divider-line"></div>
+        <div class="chapter-divider-ornament">⚜</div>
+        <div class="chapter-divider-line"></div>
+      </div>` : '';
+
+    container.innerHTML += `
+      <section class="story-chapter" id="${c.id}" data-chapter="${c.id}">
+        <div class="chapter-header">
+          <span class="chapter-era-label" style="color:${col}">${c.era}</span>
+          <div class="chapter-number" style="color:${col}">${c.num}</div>
+          <h2 class="chapter-title">${c.title}</h2>
+          <div class="chapter-dates" style="color:${col}">${c.dates}</div>
+        </div>
+        <div class="prose">${proseHTML}</div>
+        ${c.quote?`
+        <div class="pull-quote">
+          <p class="pull-quote-text">${c.quote.text}</p>
+          <div class="pull-quote-attr">${c.quote.attr}</div>
+        </div>`:''}
+        <div class="fact-box">
+          <div class="fact-box-title">FAITS CLÉS</div>
+          <ul class="fact-box-list">${factsHTML}</ul>
+        </div>
+        ${vieHTML}
+        <div class="chapter-nav">
+          ${idx>0?`<a href="#${STORY_CHAPTERS[idx-1].id}" class="cnav-btn">← ${STORY_CHAPTERS[idx-1].title}</a>`:'<span></span>'}
+          <span class="cnav-center">${c.num} / ${STORY_CHAPTERS.length}</span>
+          ${idx<STORY_CHAPTERS.length-1?`<a href="#${STORY_CHAPTERS[idx+1].id}" class="cnav-btn">${STORY_CHAPTERS[idx+1].title} →</a>`:'<span></span>'}
+        </div>
+      </section>
+      ${divider}`;
+  });
+}
+
+// ── SIDEBAR UPDATE ──
+function updateSidebar(chapterId){
+  const c = STORY_CHAPTERS.find(cc=>cc.id===chapterId);
+  if(!c) return;
+  const el = document.getElementById('sidebarContent');
+
+  const roisHTML = c.rois.map(id=>{
+    const r = HISTORIA.rois.find(rr=>rr.id===id);
+    return r?`<a href="roi.html?id=${r.id}" class="ctx-item"><span class="ctx-item-name">${r.portrait_emoji||'👑'} ${r.nom}</span><span class="ctx-item-meta">${r.debut_regne}–${r.fin_regne||'?'}</span></a>`:'';
+  }).join('');
+
+  const batsHTML = c.batailles.map(id=>{
+    const b = HISTORIA.batailles.find(bb=>bb.id===id);
+    return b?`<div class="ctx-item" style="cursor:default"><span class="ctx-item-name">⚔ ${b.nom}</span><span class="ctx-item-meta">${b.date}</span></div>`:'';
+  }).join('');
+
+  const periodesHTML = c.periodes.map(id=>{
+    const p = HISTORIA.periodes.find(pp=>pp.id===id);
+    return p?`<a href="periode.html?id=${p.id}" class="ctx-item"><span class="ctx-item-name">${p.titre}</span><span class="ctx-item-meta">${p.debut}–${p.fin}</span></a>`:'';
+  }).join('');
+
+  el.innerHTML = `
+    ${roisHTML?`<div class="ctx-section"><div class="ctx-title">SOUVERAINS</div>${roisHTML}</div>`:''}
+    ${batsHTML?`<div class="ctx-section"><div class="ctx-title">BATAILLES</div>${batsHTML}</div>`:''}
+    ${periodesHTML?`<div class="ctx-section"><div class="ctx-title">PÉRIODES</div>${periodesHTML}</div>`:''}
+    <div class="ctx-section">
+      <a href="cartes.html" class="ctx-item"><span class="ctx-item-name">🗺 Carte de l'époque</span><span class="ctx-item-meta">Ouvrir</span></a>
+      <a href="frise.html" class="ctx-item"><span class="ctx-item-name">📜 Frise</span><span class="ctx-item-meta">Voir la période</span></a>
+    </div>`;
+}
+
+// ── SCROLL TRACKING ──
+function initScrollTracking(){
+  const sections = document.querySelectorAll('.story-chapter');
+  const tocLinks = document.querySelectorAll('.toc-chapter');
+
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const id = e.target.id;
+        tocLinks.forEach(l=>{
+          l.classList.toggle('active', l.dataset.id===id);
+        });
+        updateSidebar(id);
+      }
+    });
+  },{rootMargin:'-30% 0px -60% 0px'});
+
+  sections.forEach(s=>observer.observe(s));
+
+  // Progress bar
+  window.addEventListener('scroll',()=>{
+    const total = document.body.scrollHeight - window.innerHeight;
+    const pct = total>0 ? (window.scrollY/total)*100 : 0;
+    document.getElementById('readProgress').style.width=pct+'%';
+  });
+}
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  buildTOC();
+  buildChapters();
+  initScrollTracking();
+  updateSidebar('naissance-france');
+});
+</script>
+</body>
+</html>

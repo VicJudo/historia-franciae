@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche Roi — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#7A6230;
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;--ink:#0D0A06;
+}
+html{scroll-behavior:smooth}
+body{background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif;min-height:100vh;padding-top:52px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.96);border-bottom:1px solid rgba(201,168,76,.18);backdrop-filter:blur(8px)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-links{display:flex;align-items:center;gap:1.5rem}
+.nav-link{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-link:hover{opacity:1;color:var(--gold)}
+
+/* HERO */
+.hero{background:linear-gradient(180deg,var(--stone-light) 0%,var(--stone) 100%);padding:4rem 2rem 3rem;position:relative;overflow:hidden;border-bottom:1px solid rgba(201,168,76,.12)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 20% 50%,rgba(201,168,76,.06) 0,transparent 70%)}
+.hero-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:3rem;align-items:start;position:relative}
+.hero-portrait{text-align:center;padding:2rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.15);position:relative}
+.hero-emoji{font-size:5rem;display:block;margin-bottom:1rem;line-height:1}
+.hero-dynasty-badge{display:inline-block;font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;padding:4px 12px;border:1px solid rgba(201,168,76,.3);color:var(--gold-dim);margin-bottom:.75rem}
+.hero-meta-mini{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment-dim);opacity:.5;line-height:2}
+.hero-content{}
+.hero-breadcrumb{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:1rem;opacity:.7}
+.hero-name{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:var(--parchment);line-height:.95;margin-bottom:.5rem}
+.hero-surnom{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.5rem;color:var(--gold-dim);margin-bottom:1rem}
+.hero-dates-row{display:flex;align-items:center;gap:1.5rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.hero-date-chip{background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.15);padding:.3rem .8rem}
+.hero-date-chip-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:1px}
+.hero-date-chip-value{font-family:'Cinzel',serif;font-size:13px;color:var(--parchment)}
+.hero-resume{font-size:1.05rem;line-height:1.7;color:var(--parchment-dim);max-width:560px}
+
+/* ORNAMENT DIVIDER */
+.ornament{display:flex;align-items:center;gap:1rem;margin:2.5rem 0}
+.ornament-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25))}
+.ornament-line.r{background:linear-gradient(90deg,rgba(201,168,76,.25),transparent)}
+.ornament-diamond{width:8px;height:8px;background:var(--gold-dim);transform:rotate(45deg);flex-shrink:0}
+
+/* MAIN CONTENT */
+.content-wrap{max-width:1100px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:2fr 1fr;gap:2.5rem;align-items:start}
+@media(max-width:800px){.content-wrap{grid-template-columns:1fr}.hero-inner{grid-template-columns:1fr}}
+
+/* SECTIONS */
+.section{margin-bottom:2.5rem}
+.section-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:1.2rem;padding-bottom:.5rem;border-bottom:1px solid rgba(201,168,76,.15)}
+.section-text{font-size:1rem;line-height:1.8;color:var(--parchment-dim)}
+
+/* FACTS LIST */
+.facts-list{list-style:none;display:flex;flex-direction:column;gap:.6rem}
+.facts-list li{display:flex;gap:.75rem;align-items:flex-start;padding:.6rem .8rem;background:rgba(201,168,76,.04);border-left:2px solid rgba(201,168,76,.25)}
+.facts-list li::before{content:'◆';color:var(--gold-dim);font-size:8px;flex-shrink:0;margin-top:.35rem}
+.facts-list li span{font-size:15px;color:var(--parchment-dim);line-height:1.5}
+
+/* SIDEBAR */
+.sidebar{}
+.sidebar-card{background:var(--stone-card);border:1px solid rgba(201,168,76,.12);padding:1.25rem;margin-bottom:1rem}
+.sidebar-card-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid rgba(201,168,76,.08)}
+.sidebar-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.4rem 0;border-bottom:1px solid rgba(201,168,76,.05);gap:1rem}
+.sidebar-row:last-child{border-bottom:none}
+.sidebar-row-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold-dim);flex-shrink:0}
+.sidebar-row-value{font-size:13px;color:var(--parchment-dim);text-align:right;line-height:1.4}
+
+/* RELATED */
+.related-grid{display:grid;grid-template-columns:1fr;gap:.5rem}
+.related-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .8rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.08);cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
+.related-item:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.08)}
+.related-item-icon{font-size:1.2rem;flex-shrink:0}
+.related-item-content{}
+.related-item-title{font-family:'Cinzel',serif;font-size:10px;color:var(--parchment);display:block}
+.related-item-sub{font-size:12px;color:var(--parchment-dim);opacity:.6}
+
+/* BATTLES TABLE */
+.battles-list{display:flex;flex-direction:column;gap:.5rem}
+.battle-item{padding:.7rem .9rem;background:rgba(139,26,26,.08);border:1px solid rgba(139,26,26,.2);display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s}
+.battle-item:hover{background:rgba(139,26,26,.15);border-color:rgba(139,26,26,.4)}
+.battle-item-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment)}
+.battle-item-meta{font-size:12px;color:var(--parchment-dim);opacity:.6;text-align:right}
+
+/* PREV / NEXT NAV */
+.prev-next{max-width:1100px;margin:0 auto;padding:1.5rem 2rem 3rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pn-btn{padding:1rem 1.25rem;background:var(--stone-card);border:1px solid rgba(201,168,76,.12);cursor:pointer;text-decoration:none;color:inherit;transition:all .2s;display:block}
+.pn-btn:hover{border-color:rgba(201,168,76,.3)}
+.pn-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--gold-dim);display:block;margin-bottom:.3rem}
+.pn-name{font-family:'Cinzel',serif;font-size:13px;color:var(--parchment)}
+.pn-btn.next{text-align:right}
+
+/* BACK TO TOP */
+.back-links{max-width:1100px;margin:0 auto;padding:0 2rem 3rem;display:flex;gap:1rem;flex-wrap:wrap}
+.back-link{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;padding:8px 16px;border:1px solid rgba(201,168,76,.2);color:var(--gold-dim);text-decoration:none;transition:all .2s}
+.back-link:hover{border-color:var(--gold);color:var(--gold)}
+
+/* DYNASTY COLOR BAR */
+.dyn-color-bar{height:4px;width:100%;margin-top:1rem}
+
+/* ERROR STATE */
+.error-state{text-align:center;padding:6rem 2rem}
+.error-state h2{font-family:'Cinzel',serif;font-size:1.5rem;color:var(--gold-dim);margin-bottom:1rem}
+.error-state p{color:var(--parchment-dim)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <div class="nav-links">
+    <a href="frise.html" class="nav-link">Frise</a>
+    <a href="genealogie.html" class="nav-link">Généalogie</a>
+    <a href="personnages.html" class="nav-link">Personnages</a>
+  </div>
+</nav>
+
+<div id="page-content">
+  <div class="error-state">
+    <h2>Chargement…</h2>
+    <p>Récupération des données historiques.</p>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+function getParam(key){
+  return new URLSearchParams(window.location.search).get(key);
+}
+
+function renderRoiPage(r){
+  if(!r){
+    document.getElementById('page-content').innerHTML = `
+      <div class="error-state">
+        <h2>Roi introuvable</h2>
+        <p>Cet identifiant ne correspond à aucun souverain dans notre base.</p>
+        <a href="genealogie.html" class="back-link" style="display:inline-block;margin-top:1.5rem">← Retour à l'arbre</a>
+      </div>`;
+    return;
+  }
+
+  document.title = `${r.nom} — Historia Franciae`;
+
+  const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+  const dynColor = dyn ? dyn.couleur : '#C9A84C';
+  const roisDyn = HISTORIA.utils.getRoisByDynastie(r.dynastie);
+  const idx = roisDyn.findIndex(rr=>rr.id===r.id);
+  const prev = idx > 0 ? roisDyn[idx-1] : null;
+  const next = idx < roisDyn.length-1 ? roisDyn[idx+1] : null;
+
+  // Batailles liées
+  const bataillesLiees = (r.batailles_liees||[]).map(bid => HISTORIA.batailles.find(b=>b.id===bid)).filter(Boolean);
+
+  // Périodes liées
+  const periodesLiees = (r.periodes_liees||[]).map(pid => HISTORIA.periodes.find(p=>p.id===pid)).filter(Boolean);
+
+  const faitsHTML = (r.faits||[]).map(f=>`<li><span>${f}</span></li>`).join('');
+  const bataillesHTML = bataillesLiees.map(b=>`
+    <div class="battle-item" onclick="window.location='frise.html'">
+      <div>
+        <div class="battle-item-name">⚔ ${b.nom}</div>
+        <div class="battle-item-meta" style="text-align:left;font-size:11px;margin-top:2px">${b.lieu}</div>
+      </div>
+      <div class="battle-item-meta">${b.date}<br>${b.vainqueur === r.nom || b.vainqueur.includes('France') ? '✓ Victoire':'✗ Défaite'}</div>
+    </div>`).join('');
+  const periodesHTML = periodesLiees.map(p=>`
+    <a href="periode.html?id=${p.id}" class="related-item">
+      <span class="related-item-icon">⚔</span>
+      <div class="related-item-content">
+        <span class="related-item-title">${p.titre}</span>
+        <span class="related-item-sub">${p.debut} – ${p.fin}</span>
+      </div>
+    </a>`).join('');
+
+  const prevHTML = prev ? `<a href="roi.html?id=${prev.id}" class="pn-btn"><span class="pn-label">← PRÉDÉCESSEUR</span><span class="pn-name">${prev.nom}</span></a>` : '<div></div>';
+  const nextHTML = next ? `<a href="roi.html?id=${next.id}" class="pn-btn next"><span class="pn-label">SUCCESSEUR →</span><span class="pn-name">${next.nom}</span></a>` : '<div></div>';
+
+  document.getElementById('page-content').innerHTML = `
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-inner">
+        <div class="hero-portrait">
+          <span class="hero-emoji">${r.portrait_emoji||'👑'}</span>
+          <div class="hero-dynasty-badge">${(dyn?.nom||'').toUpperCase()}</div>
+          <div class="dyn-color-bar" style="background:${dynColor}44"></div>
+          <div class="hero-meta-mini" style="margin-top:1rem">
+            Naissance : ${r.naissance||'?'}<br>
+            Mort : ${r.mort||'?'}<br>
+            Règne : ${r.debut_regne} – ${r.fin_regne||'?'}<br>
+            Durée : ${r.fin_regne && r.debut_regne ? (r.fin_regne - r.debut_regne) + ' ans' : '?'}
+          </div>
+        </div>
+        <div class="hero-content">
+          <div class="hero-breadcrumb">
+            <a href="index.html" style="color:inherit;text-decoration:none;opacity:.6">ACCUEIL</a>
+            <span style="margin:0 .5rem;opacity:.4">›</span>
+            <a href="genealogie.html" style="color:inherit;text-decoration:none;opacity:.6">GÉNÉALOGIE</a>
+            <span style="margin:0 .5rem;opacity:.4">›</span>
+            <span style="color:var(--gold-dim)">${r.nom.toUpperCase()}</span>
+          </div>
+          <h1 class="hero-name">${r.nom}</h1>
+          ${r.surnom ? `<div class="hero-surnom">"${r.surnom}"</div>` : ''}
+          <div class="hero-dates-row">
+            <div class="hero-date-chip">
+              <span class="hero-date-chip-label">NAISSANCE</span>
+              <span class="hero-date-chip-value">${r.naissance||'?'} · ${r.lieu_naissance||'?'}</span>
+            </div>
+            <div class="hero-date-chip">
+              <span class="hero-date-chip-label">RÈGNE</span>
+              <span class="hero-date-chip-value">${r.debut_regne} – ${r.fin_regne||'?'}</span>
+            </div>
+            <div class="hero-date-chip">
+              <span class="hero-date-chip-label">MORT</span>
+              <span class="hero-date-chip-value">${r.mort||'?'} · ${r.lieu_mort||'?'}</span>
+            </div>
+          </div>
+          <p class="hero-resume">${r.resume||''}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="content-wrap">
+      <!-- LEFT: main content -->
+      <div>
+        <div class="section">
+          <div class="section-title">BIOGRAPHIE COMPLÈTE</div>
+          <p class="section-text">${r.resume||'Biographie non disponible.'}</p>
+          ${r.epouse ? `
+          <div class="ornament"><div class="ornament-line"></div><div class="ornament-diamond"></div><div class="ornament-line r"></div></div>
+          <p class="section-text"><strong style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-dim);letter-spacing:1px">ÉPOUSE(S) :</strong><br>${r.epouse}</p>` : ''}
+          ${r.enfants && r.enfants.length ? `
+          <p class="section-text" style="margin-top:.75rem"><strong style="font-family:Cinzel,serif;font-size:11px;color:var(--gold-dim);letter-spacing:1px">ENFANTS :</strong><br>${r.enfants.join(' · ')}</p>` : ''}
+        </div>
+
+        ${faitsHTML ? `
+        <div class="section">
+          <div class="section-title">FAITS MARQUANTS</div>
+          <ul class="facts-list">${faitsHTML}</ul>
+        </div>` : ''}
+
+        ${bataillesHTML ? `
+        <div class="section">
+          <div class="section-title">BATAILLES DE SON RÈGNE</div>
+          <div class="battles-list">${bataillesHTML}</div>
+        </div>` : ''}
+      </div>
+
+      <!-- RIGHT: sidebar -->
+      <div class="sidebar">
+        <!-- Fiche identité -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">FICHE D'IDENTITÉ</div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Né en</span><span class="sidebar-row-value">${r.naissance||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Lieu</span><span class="sidebar-row-value">${r.lieu_naissance||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Mort en</span><span class="sidebar-row-value">${r.mort||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Lieu</span><span class="sidebar-row-value">${r.lieu_mort||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Règne</span><span class="sidebar-row-value">${r.debut_regne}–${r.fin_regne||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Durée</span><span class="sidebar-row-value">${r.fin_regne && r.debut_regne ? (r.fin_regne - r.debut_regne) + ' ans' : '?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Dynastie</span><span class="sidebar-row-value">${dyn?.nom||'?'}</span></div>
+          <div class="sidebar-row"><span class="sidebar-row-label">Épouse(s)</span><span class="sidebar-row-value">${r.epouse||'?'}</span></div>
+        </div>
+
+        <!-- Liens rapides -->
+        <div class="sidebar-card">
+          <div class="sidebar-card-title">NAVIGATION</div>
+          <div class="related-grid">
+            <a href="frise.html" class="related-item">
+              <span class="related-item-icon">📜</span>
+              <div class="related-item-content">
+                <span class="related-item-title">Voir sur la frise</span>
+                <span class="related-item-sub">Frise chronologique</span>
+              </div>
+            </a>
+            <a href="genealogie.html" class="related-item">
+              <span class="related-item-icon">👑</span>
+              <div class="related-item-content">
+                <span class="related-item-title">Arbre généalogique</span>
+                <span class="related-item-sub">${dyn?.nom||'Dynasties'}</span>
+              </div>
+            </a>
+            ${periodesHTML}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREV / NEXT -->
+    <div class="prev-next">
+      ${prevHTML}
+      ${nextHTML}
+    </div>
+
+    <!-- BACK LINKS -->
+    <div class="back-links">
+      <a href="index.html" class="back-link">⚜ Accueil</a>
+      <a href="genealogie.html" class="back-link">👑 Arbre généalogique</a>
+      <a href="frise.html" class="back-link">📜 Frise chronologique</a>
+      <a href="personnages.html" class="back-link">🧑 Personnages</a>
+    </div>`;
+}
+
+// BOOT
+document.addEventListener('DOMContentLoaded', ()=>{
+  const roiId = getParam('id');
+  // Default to louis-14 for demo if no param
+  const r = roiId ? HISTORIA.utils.getRoiById(roiId) : HISTORIA.utils.getRoiById('louis-14');
+  renderRoiPage(r);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartes Historiques — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-dim:#7A6230;--gold-faint:rgba(201,168,76,0.1);
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+}
+html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.97);border-bottom:1px solid rgba(201,168,76,.18)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-back{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--parchment-dim);text-decoration:none;opacity:.7}
+.nav-back:hover{opacity:1;color:var(--gold)}
+
+/* LAYOUT */
+.layout{position:fixed;top:52px;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 380px}
+
+/* ── LEFT: MAP ── */
+.map-col{position:relative;background:radial-gradient(ellipse 70% 70% at 50% 50%,#1a1a0e 0%,var(--stone) 100%);overflow:hidden;display:flex;flex-direction:column}
+
+/* MAP SVG CONTAINER */
+.map-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#map-svg{width:100%;height:100%;max-width:600px;max-height:620px}
+
+/* YEAR OVERLAY */
+.year-overlay{position:absolute;top:20px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:10}
+.year-big{font-family:'Cinzel',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--gold);opacity:.18;letter-spacing:.05em;line-height:1}
+.year-ruler{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;color:var(--gold-dim);opacity:.7;margin-top:.3rem}
+.dynasty-name-overlay{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--parchment-dim);opacity:.6;margin-top:.2rem}
+
+/* TIME CONTROLS */
+.time-controls{padding:1rem 1.5rem 1.2rem;background:rgba(13,10,6,.6);border-top:1px solid rgba(201,168,76,.1);flex-shrink:0}
+.slider-track{position:relative;margin-bottom:.6rem}
+#year-slider{width:100%;-webkit-appearance:none;height:3px;background:linear-gradient(90deg,var(--gold-dim) 0%,rgba(201,168,76,.15) 0%);outline:none;cursor:pointer;border-radius:2px}
+#year-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer;box-shadow:0 0 8px rgba(201,168,76,.4)}
+#year-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);opacity:.6}
+.play-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
+.play-btn{width:32px;height:32px;border:1px solid rgba(201,168,76,.3);background:transparent;color:var(--gold);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.play-btn:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+.epoch-chips{display:flex;gap:.4rem;flex-wrap:wrap;flex:1}
+.epoch-chip{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;padding:4px 8px;border:1px solid rgba(201,168,76,.15);color:var(--parchment-dim);background:transparent;cursor:pointer;transition:all .2s;white-space:nowrap}
+.epoch-chip:hover{border-color:rgba(201,168,76,.4);color:var(--gold)}
+.epoch-chip.active{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold)}
+
+/* BATTLE TOOLTIP */
+.map-tooltip{position:absolute;z-index:50;background:rgba(13,10,6,.95);border:1px solid rgba(201,168,76,.35);padding:.6rem .8rem;pointer-events:none;opacity:0;transition:opacity .15s;max-width:200px;transform:translate(-50%,-110%)}
+.map-tooltip.show{opacity:1}
+.map-tooltip-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px}
+.map-tooltip-meta{font-size:12px;color:var(--parchment-dim)}
+
+/* LEGEND */
+.map-legend{position:absolute;bottom:90px;left:16px;background:rgba(13,10,6,.85);border:1px solid rgba(201,168,76,.12);padding:.6rem .8rem;font-size:11px}
+.leg-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--parchment-dim);opacity:.7}
+.leg-row:last-child{margin-bottom:0}
+.leg-swatch{width:16px;height:10px;border-radius:1px;flex-shrink:0}
+.leg-diamond{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0}
+
+/* ── RIGHT: INFO PANEL ── */
+.info-col{background:var(--stone-card);border-left:1px solid rgba(201,168,76,.12);display:flex;flex-direction:column;overflow:hidden}
+.info-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,.1);flex-shrink:0}
+.info-tab{flex:1;padding:.7rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment-dim);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.info-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.info-tab:hover{color:var(--parchment)}
+.info-scroll{flex:1;overflow-y:auto;padding:1.25rem;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
+.info-scroll::-webkit-scrollbar{width:4px}
+.info-scroll::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15)}
+
+/* INFO CONTENT */
+.info-section{display:none}
+.info-section.active{display:block}
+.info-year-title{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:900;color:var(--gold);opacity:.4;margin-bottom:.1rem}
+.info-dynname{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--parchment);margin-bottom:.25rem}
+.info-desc{font-size:14px;line-height:1.65;color:var(--parchment-dim);opacity:.85;margin-bottom:1rem}
+.info-ruler-row{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);margin-bottom:.5rem;cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
+.info-ruler-row:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.08)}
+.info-ruler-emoji{font-size:1.4rem;flex-shrink:0}
+.info-ruler-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);display:block}
+.info-ruler-dates{font-size:11px;color:var(--parchment-dim);opacity:.6}
+
+.battle-entry{padding:.7rem .8rem;margin-bottom:.5rem;background:rgba(139,26,26,.08);border:1px solid rgba(139,26,26,.2);cursor:pointer;transition:all .2s}
+.battle-entry:hover{background:rgba(139,26,26,.15)}
+.battle-entry-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);margin-bottom:.2rem}
+.battle-entry-meta{font-size:12px;color:var(--parchment-dim);opacity:.6}
+.battle-importance{display:inline-flex;gap:2px;margin-left:.4rem}
+.battle-star{font-size:8px;color:var(--gold)}
+
+.section-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.08)}
+
+/* TERRITORY INFO */
+.terr-card{padding:.8rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);margin-bottom:.75rem}
+.terr-card-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.3rem}
+.terr-card-value{font-size:13px;color:var(--parchment-dim);line-height:1.4}
+
+/* COMPARE MODE */
+.compare-bar{display:flex;gap:.5rem;margin-bottom:.75rem}
+.compare-input{flex:1;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;padding:6px 10px;letter-spacing:1px}
+.compare-input::placeholder{color:var(--parchment-dim);opacity:.4}
+.compare-btn{padding:6px 12px;border:1px solid rgba(201,168,76,.25);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.compare-btn:hover{background:rgba(201,168,76,.1)}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Accueil</a>
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <span style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim)">CARTES</span>
+</nav>
+
+<div class="layout">
+
+  <!-- LEFT: MAP -->
+  <div class="map-col">
+    <div class="map-stage">
+      <!-- Year overlay -->
+      <div class="year-overlay">
+        <div class="year-big" id="yearBig">481</div>
+        <div class="year-ruler" id="yearRuler">MÉROVINGIENS</div>
+        <div class="dynasty-name-overlay" id="dynastyOverlay">Règne de Clovis Ier</div>
+      </div>
+
+      <!-- Main map SVG -->
+      <svg id="map-svg" viewBox="0 0 500 540" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- Ocean/background -->
+        <rect width="500" height="540" fill="#0A0E14"/>
+        <!-- Grid lines (subtle) -->
+        <g stroke="rgba(255,255,255,0.03)" stroke-width="0.5">
+          <line x1="0" y1="135" x2="500" y2="135"/>
+          <line x1="0" y1="270" x2="500" y2="270"/>
+          <line x1="0" y1="405" x2="500" y2="405"/>
+          <line x1="125" y1="0" x2="125" y2="540"/>
+          <line x1="250" y1="0" x2="250" y2="540"/>
+          <line x1="375" y1="0" x2="375" y2="540"/>
+        </g>
+
+        <!-- Neighboring regions (muted) -->
+        <!-- England -->
+        <path d="M 80 20 L 145 15 L 160 50 L 145 80 L 95 85 L 70 60 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+        <text x="112" y="52" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Angleterre</text>
+        <!-- Germany/HRE -->
+        <path d="M 360 20 L 490 25 L 495 200 L 430 210 L 370 180 L 350 120 L 340 60 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+        <text x="420" y="110" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Saint-Empire</text>
+        <!-- Spain -->
+        <path d="M 50 420 L 200 410 L 250 430 L 260 500 L 100 510 L 40 490 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+        <text x="150" y="465" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Espagne</text>
+        <!-- Italy -->
+        <path d="M 370 320 L 450 310 L 480 390 L 440 490 L 390 470 L 365 400 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
+        <text x="418" y="395" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Italie</text>
+
+        <!-- FRANCE BASE TERRITORY -->
+        <path id="france-territory" d="
+          M 165 55
+          L 210 42 L 265 38 L 310 48 L 340 62 L 355 88
+          L 358 120 L 345 145 L 358 168
+          L 362 195 L 348 225 L 358 258
+          L 348 285 L 330 308 L 295 328
+          L 268 345 L 245 365 L 225 382
+          L 198 398 L 172 405 L 148 395
+          L 118 375 L 95 350 L 78 320
+          L 68 290 L 72 260 L 58 232
+          L 55 200 L 65 172 L 55 148
+          L 58 120 L 72 98 L 88 78
+          L 118 60 Z"
+          fill="#2A2510" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" id="france-base-path"/>
+
+        <!-- Territory overlay (changes dynamically) -->
+        <path id="territory-main" d="" fill="rgba(201,168,76,0.15)" stroke="rgba(201,168,76,0.5)" stroke-width="1" opacity="0" style="transition:all .8s ease"/>
+
+        <!-- Occupation overlay (enemy zones) -->
+        <path id="territory-enemy" d="" fill="rgba(139,26,26,0.2)" stroke="rgba(200,50,50,0.5)" stroke-width="1" stroke-dasharray="4 3" opacity="0" style="transition:all .6s"/>
+
+        <!-- Ally overlay -->
+        <path id="territory-ally" d="" fill="rgba(26,46,90,0.25)" stroke="rgba(74,122,181,0.5)" stroke-width="1" opacity="0" style="transition:all .6s"/>
+
+        <!-- Brittany peninsula -->
+        <path d="M 68 168 L 45 155 L 22 148 L 10 162 L 18 182 L 42 192 L 60 188 Z"
+          fill="#2A2510" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+
+        <!-- Corsica -->
+        <ellipse cx="420" cy="420" rx="14" ry="22" fill="#2A2510" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <text x="420" y="424" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Corse</text>
+
+        <!-- Paris marker (fixed) -->
+        <circle id="paris-marker" cx="212" cy="148" r="5" fill="var(--gold)" opacity="0.85"/>
+        <circle cx="212" cy="148" r="9" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+        <text x="220" y="144" font-family="'Cinzel',serif" font-size="9" fill="rgba(201,168,76,0.8)">Paris</text>
+
+        <!-- Battle markers (placed dynamically) -->
+        <g id="battle-markers-group"></g>
+
+        <!-- City markers (placed dynamically) -->
+        <g id="city-markers-group"></g>
+
+        <!-- Domain royal indicator -->
+        <path id="domain-royal" d="" fill="rgba(201,168,76,0.35)" stroke="var(--gold)" stroke-width="1.5" opacity="0"/>
+
+        <!-- Compass rose -->
+        <g transform="translate(455,480)" opacity="0.35">
+          <line x1="0" y1="-16" x2="0" y2="16" stroke="rgba(201,168,76,0.6)" stroke-width="0.8"/>
+          <line x1="-16" y1="0" x2="16" y2="0" stroke="rgba(201,168,76,0.6)" stroke-width="0.8"/>
+          <polygon points="0,-16 -4,-8 0,-4 4,-8" fill="rgba(201,168,76,0.8)"/>
+          <text x="0" y="-20" text-anchor="middle" font-family="serif" font-size="8" fill="rgba(201,168,76,0.6)">N</text>
+        </g>
+
+        <!-- Scale indicator -->
+        <g transform="translate(30,510)" opacity="0.4">
+          <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <line x1="60" y1="-4" x2="60" y2="4" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <text x="30" y="-6" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.5)">~500 km</text>
+        </g>
+      </svg>
+
+      <!-- Map tooltip -->
+      <div class="map-tooltip" id="mapTooltip">
+        <div class="map-tooltip-name" id="tt-name"></div>
+        <div class="map-tooltip-meta" id="tt-meta"></div>
+      </div>
+
+      <!-- Legend -->
+      <div class="map-legend">
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.5)"></div>Domaine royal</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(139,26,26,0.3);border:1px dashed rgba(200,50,50,0.5)"></div>Territoire ennemi</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(26,46,90,0.3);border:1px solid rgba(74,122,181,0.5)"></div>Allié / Vassal</div>
+        <div class="leg-row"><div class="leg-diamond" style="background:#C04030"></div>Bataille (victoire)</div>
+        <div class="leg-row"><div class="leg-diamond" style="background:#4A4A7A"></div>Bataille (défaite)</div>
+      </div>
+    </div>
+
+    <!-- TIME CONTROLS -->
+    <div class="time-controls">
+      <div class="play-row">
+        <button class="play-btn" id="playBtn" onclick="togglePlay()" title="Animer">▶</button>
+        <div class="epoch-chips" id="epochChips"></div>
+      </div>
+      <div class="slider-track">
+        <input type="range" id="year-slider" min="481" max="1969" value="481" step="1" oninput="onSlider(this.value)">
+      </div>
+      <div class="slider-labels">
+        <span>481</span><span>700</span><span>900</span><span>1100</span><span>1300</span><span>1500</span><span>1700</span><span>1850</span><span>1969</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-col">
+    <div class="info-tabs">
+      <button class="info-tab active" onclick="switchTab('context',this)">CONTEXTE</button>
+      <button class="info-tab" onclick="switchTab('batailles',this)">BATAILLES</button>
+      <button class="info-tab" onclick="switchTab('territoire',this)">TERRITOIRE</button>
+    </div>
+    <div class="info-scroll">
+      <!-- CONTEXT TAB -->
+      <div class="info-section active" id="tab-context">
+        <div class="info-year-title" id="ctx-year">481</div>
+        <div class="info-dynname" id="ctx-dyn">Mérovingiens</div>
+        <p class="info-desc" id="ctx-desc">Clovis Ier fonde le royaume franc unifié après la victoire contre Syagrius.</p>
+
+        <div class="section-label">SOUVERAIN(S) EN PLACE</div>
+        <div id="ctx-rulers"></div>
+
+        <div class="section-label" id="evt-label" style="margin-top:1.25rem">ÉVÉNEMENTS DE L'ÉPOQUE</div>
+        <div id="ctx-events"></div>
+      </div>
+
+      <!-- BATAILLES TAB -->
+      <div class="info-section" id="tab-batailles">
+        <div class="section-label">BATAILLES DE CETTE PÉRIODE</div>
+        <div id="bat-list"></div>
+      </div>
+
+      <!-- TERRITOIRE TAB -->
+      <div class="info-section" id="tab-territoire">
+        <div class="section-label">ÉTAT DU TERRITOIRE</div>
+        <div id="terr-info"></div>
+
+        <div class="section-label" style="margin-top:1rem">COMPARER DEUX ÉPOQUES</div>
+        <div class="compare-bar">
+          <input class="compare-input" id="cmp-year1" type="number" placeholder="Année 1" min="481" max="1969" value="987">
+          <input class="compare-input" id="cmp-year2" type="number" placeholder="Année 2" min="481" max="1969" value="1643">
+          <button class="compare-btn" onclick="compareYears()">GO</button>
+        </div>
+        <div id="compare-result"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ── STATE ──
+let currentYear = 481;
+let isPlaying = false;
+let playInterval = null;
+let activeTab = 'context';
+
+// ── TERRITORY DATA ──
+// Simplified SVG paths for each major era
+const TERRITORIES = {
+  481:  { main: "M 165 55 L 265 38 L 340 62 L 358 120 L 362 195 L 295 328 L 172 405 L 68 290 L 55 148 L 88 78 Z", enemy:"", ally:"", domain:"M 180 90 L 260 82 L 310 105 L 300 160 L 240 175 L 165 160 L 155 120 Z", label:"Royaume franc initial" },
+  600:  { main: "M 145 42 L 310 28 L 360 55 L 370 130 L 365 200 L 325 320 L 198 408 L 68 290 L 48 160 L 65 90 Z", enemy:"", ally:"", domain:"M 165 75 L 285 65 L 330 100 L 318 170 L 248 188 L 158 172 L 145 128 Z", label:"Royaume mérovingien" },
+  800:  { main: "M 80 18 L 355 8 L 490 70 L 495 260 L 440 310 L 365 290 L 340 400 L 198 408 L 42 280 L 20 148 L 50 60 Z", enemy:"", ally:"M 52 308 L 200 290 L 248 370 L 200 408 L 80 390 L 42 340 Z", domain:"M 175 80 L 280 65 L 330 105 L 320 165 L 250 182 L 165 165 L 148 120 Z", label:"Empire carolingien" },
+  987:  { main: "M 155 52 L 270 40 L 342 62 L 355 122 L 360 192 L 298 328 L 172 408 L 68 290 L 52 148 L 85 78 Z", enemy:"M 160 52 L 268 40 L 295 55 L 288 110 L 240 125 L 170 108 L 158 75 Z", ally:"", domain:"M 178 95 L 240 88 L 265 115 L 255 152 L 212 162 L 172 148 L 165 118 Z", label:"Domaine royal réduit" },
+  1180: { main: "M 152 50 L 270 38 L 345 62 L 358 125 L 362 198 L 298 328 L 168 408 L 65 290 L 50 145 L 82 75 Z", enemy:"M 145 50 L 220 38 L 235 55 L 215 98 L 172 105 L 148 88 Z", ally:"", domain:"M 172 80 L 265 68 L 312 98 L 298 165 L 238 182 L 165 168 L 148 122 Z", label:"Avant Philippe Auguste" },
+  1223: { main: "M 148 48 L 270 36 L 348 62 L 360 128 L 365 200 L 302 328 L 168 408 L 62 290 L 48 142 L 80 72 Z", enemy:"", ally:"", domain:"M 165 65 L 292 52 L 340 90 L 325 180 L 252 198 L 155 182 L 138 128 Z", label:"Philippe Auguste — territoire triplé" },
+  1328: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"", ally:"", domain:"M 158 58 L 305 45 L 355 88 L 342 195 L 265 212 L 148 195 L 128 138 Z", label:"France capétienne à l'apogée" },
+  1360: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 148 48 L 205 42 L 235 65 L 228 115 L 195 128 L 152 115 L 138 78 Z", ally:"", domain:"M 188 95 L 272 82 L 308 118 L 295 175 L 235 192 L 182 178 L 162 132 Z", label:"Traité de Brétigny — cessions à l'Angleterre" },
+  1429: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 148 48 L 280 38 L 340 68 L 332 145 L 275 158 L 178 145 L 148 95 Z", ally:"M 268 38 L 348 58 L 362 130 L 325 165 L 278 158 L 285 90 Z", domain:"M 192 158 L 265 145 L 295 178 L 280 228 L 218 242 L 185 225 Z", label:"Guerre de Cent Ans — zones d'occupation" },
+  1453: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 170 55 L 210 48 L 225 68 L 218 95 L 188 102 L 168 88 Z", ally:"", domain:"M 155 58 L 305 45 L 355 88 L 342 192 L 262 210 L 148 195 L 128 138 Z", label:"Victoire finale — seul Calais manque" },
+  1515: { main: "M 145 45 L 272 34 L 352 60 L 365 132 L 370 205 L 308 332 L 165 412 L 58 295 L 43 138 L 75 68 Z", enemy:"", ally:"M 340 60 L 395 52 L 420 100 L 400 155 L 355 148 L 340 105 Z", domain:"M 152 55 L 308 42 L 358 85 L 345 195 L 260 212 L 145 198 L 125 135 Z", label:"François Ier — après Marignan" },
+  1643: { main: "M 142 43 L 272 32 L 355 58 L 368 135 L 372 208 L 310 335 L 162 415 L 55 298 L 40 135 L 72 65 Z", enemy:"", ally:"M 342 58 L 398 50 L 425 102 L 402 158 L 352 150 L 338 105 Z", domain:"M 148 52 L 312 38 L 362 82 L 348 198 L 258 215 L 142 200 L 120 132 Z", label:"Louis XIV — début du Grand Siècle" },
+  1715: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Louis XIV — apogée territorial" },
+  1789: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Veille de la Révolution" },
+  1811: { main: "M 50 8 L 490 5 L 495 305 L 435 318 L 358 295 L 328 415 L 195 418 L 28 295 L 10 148 L 32 50 Z", enemy:"", ally:"M 50 298 L 195 282 L 248 375 L 198 418 L 55 398 L 30 342 Z", domain:"M 138 40 L 315 28 L 368 72 L 352 198 L 252 218 L 135 202 L 112 125 Z", label:"Empire napoléonien à l'apogée" },
+  1815: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 312 36 L 365 80 L 350 200 L 252 218 L 138 205 L 115 128 Z", label:"Restauration — frontières de 1792" },
+  1870: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"M 338 55 L 375 60 L 378 110 L 348 118 L 330 90 Z", ally:"", domain:"M 142 48 L 312 36 L 365 80 L 350 200 L 252 218 L 138 205 L 115 128 Z", label:"IIIe République — perte Alsace-Lorraine" },
+  1918: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Après la Grande Guerre — Alsace-Lorraine retrouvée" },
+  1958: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Ve République — France actuelle" },
+};
+
+// Battles with approximate SVG coordinates
+const BATTLE_COORDS = {
+  tolbiac:      {x:382,y:88,  win:true},
+  vouille:      {x:140,y:298, win:true},
+  poitiers_732: {x:142,y:268, win:true},
+  roncevaux:    {x:118,y:408, win:false},
+  bouvines:     {x:262,y:88,  win:true},
+  crecy:        {x:208,y:105, win:false},
+  poitiers:     {x:145,y:268, win:false},
+  azincourt:    {x:215,y:108, win:false},
+  orleans:      {x:205,y:198, win:true},
+  castillon:    {x:118,y:322, win:true},
+  marignan:     {x:445,y:188, win:true},
+  pavie:        {x:440,y:192, win:false},
+  ivry:         {x:195,y:152, win:true},
+  la_rochelle:  {x:108,y:278, win:false},
+  rocroi:       {x:248,y:98,  win:true},
+  fontenoy:     {x:255,y:98,  win:true},
+  austerlitz:   {x:472,y:175, win:true},
+  iena:         {x:385,y:145, win:true},
+  borodino:     {x:498,y:108, win:false},
+  waterloo:     {x:255,y:98,  win:false},
+  sedan:        {x:248,y:102, win:false},
+  verdun:       {x:265,y:132, win:true},
+  marne_1914:   {x:228,y:148, win:true},
+};
+
+// ── EPOCH CHIPS ──
+const EPOCHS = [
+  {label:'Mérovingiens', year:481},
+  {label:'Charlemagne', year:800},
+  {label:'Capétiens', year:987},
+  {label:'Cent Ans', year:1429},
+  {label:'Renaissance', year:1515},
+  {label:'Bourbons', year:1643},
+  {label:'Révolution', year:1789},
+  {label:'Empire', year:1811},
+  {label:'Restauration', year:1815},
+  {label:'IIIe Rép.', year:1870},
+  {label:'Libération', year:1944},
+];
+
+function buildEpochChips(){
+  const el = document.getElementById('epochChips');
+  EPOCHS.forEach(e=>{
+    const btn = document.createElement('button');
+    btn.className='epoch-chip';
+    btn.textContent=e.label;
+    btn.dataset.year=e.year;
+    btn.addEventListener('click',()=>{ setYear(e.year); updateActiveChip(e.year); });
+    el.appendChild(btn);
+  });
+}
+
+function updateActiveChip(year){
+  document.querySelectorAll('.epoch-chip').forEach(c=>{
+    c.classList.toggle('active', parseInt(c.dataset.year)===year || EPOCHS.find(e=>e.year===year && e.label===c.textContent));
+  });
+}
+
+// ── MAIN UPDATE ──
+function setYear(year){
+  currentYear = Math.max(481, Math.min(1969, parseInt(year)));
+  document.getElementById('year-slider').value = currentYear;
+  updateSliderGradient(currentYear);
+  updateYearOverlay(currentYear);
+  updateMap(currentYear);
+  updateInfoPanel(currentYear);
+}
+
+function onSlider(v){ setYear(parseInt(v)); }
+
+function updateSliderGradient(year){
+  const pct = ((year-481)/(1969-481)*100).toFixed(1);
+  document.getElementById('year-slider').style.background =
+    `linear-gradient(90deg,var(--gold-dim) ${pct}%,rgba(201,168,76,0.12) ${pct}%)`;
+}
+
+function updateYearOverlay(year){
+  document.getElementById('yearBig').textContent = year;
+  const dyn = HISTORIA.utils.getDynastieParAnnee(year);
+  document.getElementById('yearRuler').textContent = dyn ? dyn.nom.toUpperCase() : '';
+  const rois = HISTORIA.utils.getRoisParAnnee(year);
+  document.getElementById('dynastyOverlay').textContent = rois.length ? `Règne de ${rois[0].nom}` : '';
+}
+
+function getClosestTerritory(year){
+  const keys = Object.keys(TERRITORIES).map(Number).sort((a,b)=>a-b);
+  let closest = keys[0];
+  for(const k of keys){ if(k <= year) closest = k; else break; }
+  return TERRITORIES[closest];
+}
+
+function updateMap(year){
+  const terr = getClosestTerritory(year);
+  const dyn = HISTORIA.utils.getDynastieParAnnee(year);
+  const dynColor = dyn ? dyn.couleur : '#C9A84C';
+
+  // Update territory paths
+  document.getElementById('territory-main').setAttribute('d', terr.main||'');
+  document.getElementById('territory-main').setAttribute('fill', dynColor+'22');
+  document.getElementById('territory-main').setAttribute('stroke', dynColor+'88');
+  document.getElementById('territory-main').setAttribute('opacity', terr.main?'1':'0');
+
+  document.getElementById('territory-enemy').setAttribute('d', terr.enemy||'');
+  document.getElementById('territory-enemy').setAttribute('opacity', terr.enemy?'1':'0');
+
+  document.getElementById('territory-ally').setAttribute('d', terr.ally||'');
+  document.getElementById('territory-ally').setAttribute('opacity', terr.ally?'1':'0');
+
+  document.getElementById('domain-royal').setAttribute('d', terr.domain||'');
+  document.getElementById('domain-royal').setAttribute('fill', dynColor+'55');
+  document.getElementById('domain-royal').setAttribute('stroke', dynColor);
+  document.getElementById('domain-royal').setAttribute('opacity', terr.domain?'0.85':'0');
+
+  // France base color
+  document.getElementById('france-base-path').setAttribute('fill', dynColor+'18');
+
+  // Update battle markers (show relevant battles ±50 years)
+  updateBattleMarkers(year);
+}
+
+function updateBattleMarkers(year){
+  const g = document.getElementById('battle-markers-group');
+  g.innerHTML = '';
+  const visible = HISTORIA.batailles.filter(b => Math.abs(b.date - year) < 80);
+  visible.forEach(b=>{
+    const coords = BATTLE_COORDS[b.id];
+    if(!coords) return;
+    const dist = Math.abs(b.date - year);
+    const opacity = Math.max(0.25, 1 - dist/80);
+    const col = coords.win ? '#C04030' : '#4A4A7A';
+    const size = 5 + b.importance;
+    g.innerHTML += `
+      <g class="battle-pin" style="cursor:pointer;opacity:${opacity}"
+         onmouseenter="showMapTooltip(event,'${b.nom}','${b.date} — ${b.lieu}')"
+         onmouseleave="hideMapTooltip()">
+        <rect x="${coords.x - size/2}" y="${coords.y - size/2}" width="${size}" height="${size}"
+              transform="rotate(45,${coords.x},${coords.y})"
+              fill="${col}" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
+        ${dist < 15 ? `<text x="${coords.x+size+2}" y="${coords.y+3}" font-family="serif" font-size="8" fill="rgba(201,168,76,0.7)">${b.nom}</text>` : ''}
+      </g>`;
+  });
+}
+
+// ── INFO PANEL ──
+function updateInfoPanel(year){
+  const dyn = HISTORIA.utils.getDynastieParAnnee(year);
+  const rois = HISTORIA.utils.getRoisParAnnee(year);
+
+  // Context tab
+  document.getElementById('ctx-year').textContent = year;
+  document.getElementById('ctx-dyn').textContent = dyn ? dyn.nom : '';
+  document.getElementById('ctx-desc').textContent = dyn ? dyn.description : '';
+
+  // Rulers
+  const rulersEl = document.getElementById('ctx-rulers');
+  rulersEl.innerHTML = rois.length ? rois.map(r=>`
+    <a href="roi.html?id=${r.id}" class="info-ruler-row">
+      <span class="info-ruler-emoji">${r.portrait_emoji||'👑'}</span>
+      <div>
+        <span class="info-ruler-name">${r.nom}${r.surnom?' — '+r.surnom:''}</span>
+        <span class="info-ruler-dates">Règne : ${r.debut_regne}–${r.fin_regne||'?'}</span>
+      </div>
+    </a>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.6">Aucun souverain identifié.</p>';
+
+  // Events near this year
+  const evts = HISTORIA.evenements.filter(e=>Math.abs(e.date-year)<30).slice(0,4);
+  const evtsEl = document.getElementById('ctx-events');
+  evtsEl.innerHTML = evts.length ? evts.map(e=>`
+    <div style="padding:.5rem .7rem;margin-bottom:.4rem;background:rgba(201,168,76,.04);border-left:2px solid rgba(201,168,76,.2)">
+      <div style="font-family:Cinzel,serif;font-size:9px;color:var(--gold-dim);letter-spacing:2px">${e.date}</div>
+      <div style="font-size:13px;color:var(--parchment-dim);margin-top:2px">${e.titre}</div>
+    </div>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.5">Aucun événement proche.</p>';
+
+  // Battles tab
+  const bats = HISTORIA.batailles.filter(b=>Math.abs(b.date-year)<60).sort((a,b)=>Math.abs(a.date-year)-Math.abs(b.date-year));
+  document.getElementById('bat-list').innerHTML = bats.length ? bats.map(b=>{
+    const stars = '<span class="battle-star">★</span>'.repeat(b.importance);
+    return `<div class="battle-entry" onclick="">
+      <div class="battle-entry-name">⚔ ${b.nom} <span class="battle-importance">${stars}</span></div>
+      <div class="battle-entry-meta">${b.date} · ${b.lieu}<br>${b.vainqueur} vs ${b.perdant}</div>
+    </div>`;
+  }).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.5;padding:.5rem">Aucune bataille dans cette période.</p>';
+
+  // Territory tab
+  const terr = getClosestTerritory(year);
+  document.getElementById('terr-info').innerHTML = `
+    <div class="terr-card"><span class="terr-card-label">SITUATION</span><span class="terr-card-value">${terr.label||'—'}</span></div>
+    ${dyn?`<div class="terr-card"><span class="terr-card-label">DYNASTY</span><span class="terr-card-value">${dyn.nom} (${dyn.debut}–${dyn.fin===9999?'présent':dyn.fin})</span></div>`:''}
+    <div class="terr-card"><span class="terr-card-label">TERRITOIRE ENNEMI</span><span class="terr-card-value" style="color:rgba(200,80,80,.8)">${terr.enemy?'Zones d\'occupation présentes':'Territoire sécurisé'}</span></div>
+    <div class="terr-card"><span class="terr-card-label">ALLIÉS / VASSAUX</span><span class="terr-card-value" style="color:rgba(74,122,181,.8)">${terr.ally?'Présents':'Aucun affiché'}</span></div>`;
+}
+
+// ── COMPARE ──
+function compareYears(){
+  const y1 = parseInt(document.getElementById('cmp-year1').value)||987;
+  const y2 = parseInt(document.getElementById('cmp-year2').value)||1643;
+  const d1 = HISTORIA.utils.getDynastieParAnnee(y1);
+  const d2 = HISTORIA.utils.getDynastieParAnnee(y2);
+  const r1 = HISTORIA.utils.getRoisParAnnee(y1)[0];
+  const r2 = HISTORIA.utils.getRoisParAnnee(y2)[0];
+  document.getElementById('compare-result').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem">
+      <div class="terr-card" style="border-left:3px solid ${d1?.couleur||'var(--gold)'}">
+        <span class="terr-card-label">${y1}</span>
+        <span class="terr-card-value">${d1?.nom||'?'}<br><small style="opacity:.6">${r1?r1.nom:'?'}</small></span>
+      </div>
+      <div class="terr-card" style="border-left:3px solid ${d2?.couleur||'var(--gold)'}">
+        <span class="terr-card-label">${y2}</span>
+        <span class="terr-card-value">${d2?.nom||'?'}<br><small style="opacity:.6">${r2?r2.nom:'?'}</small></span>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--parchment-dim);margin-top:.75rem;line-height:1.5">
+      Entre <strong style="color:var(--gold)">${y1}</strong> et <strong style="color:var(--gold)">${y2}</strong>, 
+      soit <strong style="color:var(--gold)">${Math.abs(y2-y1)} ans</strong> d'histoire française.
+      ${d1?.id!==d2?.id?`La France passe de la ${d1?.nom||'?'} à la ${d2?.nom||'?'}.`:'La même dynastie règne.'}
+    </p>`;
+}
+
+// ── TABS ──
+function switchTab(name, btn){
+  activeTab = name;
+  document.querySelectorAll('.info-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.info-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── TOOLTIP ──
+function showMapTooltip(e, name, meta){
+  const tt = document.getElementById('mapTooltip');
+  document.getElementById('tt-name').textContent = name;
+  document.getElementById('tt-meta').textContent = meta;
+  tt.style.left = (e.offsetX||100)+'px';
+  tt.style.top = (e.offsetY||100)+'px';
+  tt.classList.add('show');
+}
+function hideMapTooltip(){ document.getElementById('mapTooltip').classList.remove('show'); }
+
+// ── PLAY ANIMATION ──
+function togglePlay(){
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('playBtn');
+  if(isPlaying){
+    btn.textContent = '⏸';
+    playInterval = setInterval(()=>{
+      if(currentYear >= 1969){ clearInterval(playInterval); isPlaying=false; btn.textContent='▶'; return; }
+      setYear(currentYear + 5);
+    }, 120);
+  } else {
+    clearInterval(playInterval);
+    btn.textContent = '▶';
+  }
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') setYear(currentYear+10);
+  if(e.key==='ArrowLeft') setYear(currentYear-10);
+  if(e.key===' '){ e.preventDefault(); togglePlay(); }
+});
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  buildEpochChips();
+  setYear(481);
+});
+</script>
+</body>
+</html>

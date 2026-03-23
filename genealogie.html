@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arbre Généalogique — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#7A6230;
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+}
+html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.96);border-bottom:1px solid rgba(201,168,76,.18);backdrop-filter:blur(8px)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-back{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-back:hover{opacity:1;color:var(--gold)}
+.nav-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim)}
+
+/* DYNASTY TABS */
+.dyn-tabs{position:fixed;top:52px;left:0;right:0;z-index:190;height:46px;display:flex;align-items:center;gap:0;background:rgba(13,10,6,.96);border-bottom:1px solid rgba(201,168,76,.1);overflow-x:auto;scrollbar-width:none;padding:0 1rem}
+.dyn-tabs::-webkit-scrollbar{display:none}
+.dyn-tab{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:6px 16px;border:none;background:transparent;color:var(--parchment-dim);cursor:pointer;transition:all .2s;white-space:nowrap;border-bottom:2px solid transparent;opacity:.6}
+.dyn-tab:hover{opacity:1;color:var(--parchment)}
+.dyn-tab.active{opacity:1;border-bottom-color:var(--gold);color:var(--gold)}
+
+/* CONTROLS */
+.controls{position:fixed;top:98px;right:16px;z-index:180;display:flex;flex-direction:column;gap:.4rem}
+.ctrl-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,168,76,.25);background:rgba(13,10,6,.85);color:var(--gold-dim);font-size:16px;cursor:pointer;transition:all .2s;backdrop-filter:blur(4px)}
+.ctrl-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* CANVAS WRAP */
+.canvas-wrap{position:fixed;top:98px;left:0;right:0;bottom:0;overflow:auto;cursor:grab;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(201,168,76,.04) 0,transparent 70%)}
+.canvas-wrap:active{cursor:grabbing}
+.canvas-wrap::-webkit-scrollbar{width:5px;height:5px}
+.canvas-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2)}
+#tree-svg{display:block;transition:transform .1s}
+
+/* CONNECTOR LINES */
+.connector{stroke:rgba(201,168,76,.25);stroke-width:1;fill:none}
+.connector-marriage{stroke:rgba(201,168,76,.5);stroke-width:1.5;stroke-dasharray:4 3;fill:none}
+
+/* NODE CARDS */
+.king-node{cursor:pointer;transition:all .25s}
+.king-node:hover .node-card{filter:brightness(1.25)}
+.king-node:hover .node-glow{opacity:1}
+.king-card-bg{fill:var(--stone-card);stroke:rgba(201,168,76,.3);stroke-width:1}
+.king-card-bg.highlighted{stroke:var(--gold);stroke-width:2}
+.king-card-bg.selected{stroke:var(--gold-light);stroke-width:2.5;filter:drop-shadow(0 0 8px rgba(201,168,76,.4))}
+.node-glow{opacity:0;transition:opacity .25s}
+.king-name{font-family:'Cinzel',serif;font-size:11px;font-weight:700;fill:var(--parchment)}
+.king-dates{font-family:'EB Garamond',serif;font-size:10px;fill:var(--parchment-dim);opacity:.7}
+.king-surnom{font-family:'EB Garamond',serif;font-style:italic;font-size:9px;fill:var(--gold-dim)}
+.king-emoji{font-size:14px}
+.dynasty-section-label{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;fill:rgba(201,168,76,.35)}
+
+/* HOVER CARD */
+#hoverCard{position:fixed;z-index:350;pointer-events:none;opacity:0;transition:opacity .2s;background:var(--stone-card);border:1px solid rgba(201,168,76,.4);padding:1rem;width:240px;transform:translate(12px,-50%)}
+#hoverCard.show{opacity:1}
+.hc-type{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.3rem}
+.hc-name{font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--parchment);margin-bottom:.2rem;line-height:1.2}
+.hc-dates{font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:var(--parchment-dim);opacity:.7;margin-bottom:.6rem}
+.hc-facts{font-size:13px;color:var(--parchment-dim);line-height:1.5}
+.hc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.6rem}
+.hc-cell{background:rgba(201,168,76,.06);padding:.3rem .5rem}
+.hc-cell-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:2px;color:var(--gold-dim);display:block}
+.hc-cell-val{font-size:11px;color:var(--parchment-dim)}
+
+/* DETAIL PANEL */
+.detail-panel{position:fixed;right:0;top:52px;bottom:0;width:400px;background:var(--stone-card);border-left:1px solid rgba(201,168,76,.2);transform:translateX(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:300;display:flex;flex-direction:column;overflow:hidden}
+.detail-panel.open{transform:translateX(0)}
+.detail-close{position:absolute;top:14px;right:14px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,168,76,.25);color:var(--gold-dim);font-size:18px;cursor:pointer;background:none}
+.detail-close:hover{border-color:var(--gold);color:var(--gold)}
+.detail-scroll{flex:1;overflow-y:auto;padding:1.5rem;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
+.detail-scroll::-webkit-scrollbar{width:4px}
+.detail-scroll::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2)}
+.d-emoji{font-size:2.5rem;margin-bottom:.75rem;display:block}
+.d-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:.4rem}
+.d-name{font-family:'Cinzel',serif;font-size:1.4rem;font-weight:900;color:var(--parchment);line-height:1.1;margin-bottom:.25rem}
+.d-surnom{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--gold-dim);margin-bottom:.75rem}
+.d-divider{height:1px;background:linear-gradient(90deg,rgba(201,168,76,.3),transparent);margin:1rem 0}
+.d-section-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.5rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.1)}
+.d-text{font-size:15px;line-height:1.7;color:var(--parchment-dim)}
+.d-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.d-meta-item{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);padding:.5rem .7rem}
+.d-meta-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.2rem}
+.d-meta-val{font-size:13px;color:var(--parchment-dim);line-height:1.3}
+.d-facts{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+.d-facts li{font-size:14px;color:var(--parchment-dim);padding-left:1.2rem;position:relative;line-height:1.5}
+.d-facts li::before{content:'◆';position:absolute;left:0;color:var(--gold-dim);font-size:7px;top:.4rem}
+.d-link{display:block;width:100%;padding:.7rem;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;text-align:center;border:1px solid rgba(201,168,76,.3);color:var(--gold);background:transparent;cursor:pointer;text-decoration:none;margin-top:1rem;transition:all .2s}
+.d-link:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+
+/* DYNASTY HEADER BANNER */
+.dyn-banner{position:fixed;top:98px;left:0;right:0;height:36px;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:all .4s;z-index:170}
+.dyn-banner-inner{font-family:'Cinzel',serif;font-size:11px;letter-spacing:6px;padding:0 2rem}
+
+/* LEGEND */
+.legend{position:fixed;bottom:16px;left:16px;z-index:180;display:flex;flex-direction:column;gap:.4rem;background:rgba(13,10,6,.85);border:1px solid rgba(201,168,76,.12);padding:.6rem .8rem;backdrop-filter:blur(4px)}
+.leg-item{display:flex;align-items:center;gap:.5rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--parchment-dim);opacity:.7}
+.leg-line{width:24px;height:1px;background:rgba(201,168,76,.25)}
+.leg-dash{width:24px;height:1px;background:rgba(201,168,76,.5);background-image:repeating-linear-gradient(90deg,rgba(201,168,76,.5) 0,rgba(201,168,76,.5) 4px,transparent 4px,transparent 7px)}
+.leg-dot{width:8px;height:8px;background:var(--gold);border-radius:50%}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Accueil</a>
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <span class="nav-title">ARBRE GÉNÉALOGIQUE</span>
+</nav>
+
+<div class="dyn-tabs" id="dynTabs"></div>
+
+<!-- Canvas -->
+<div class="canvas-wrap" id="canvasWrap">
+  <svg id="tree-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<!-- Zoom controls -->
+<div class="controls">
+  <button class="ctrl-btn" onclick="zoomIn()" title="Zoom +">+</button>
+  <button class="ctrl-btn" onclick="zoomOut()" title="Zoom −">−</button>
+  <button class="ctrl-btn" onclick="resetZoom()" title="Réinitialiser" style="font-size:11px">↺</button>
+  <button class="ctrl-btn" onclick="toggleAll()" title="Voir toutes dynasties" style="font-size:10px;font-family:Cinzel,serif;letter-spacing:0;width:auto;padding:0 6px">Tout</button>
+</div>
+
+<!-- Hover card -->
+<div id="hoverCard">
+  <div class="hc-type" id="hc-type"></div>
+  <div class="hc-name" id="hc-name"></div>
+  <div class="hc-dates" id="hc-dates"></div>
+  <div class="hc-facts" id="hc-resume"></div>
+  <div class="hc-grid" id="hc-grid"></div>
+</div>
+
+<!-- Detail panel -->
+<div class="detail-panel" id="detailPanel">
+  <button class="detail-close" onclick="closeDetail()">×</button>
+  <div class="detail-scroll" id="detailScroll"></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-line"></div> Filiation</div>
+  <div class="leg-item"><div class="leg-dash"></div> Mariage</div>
+  <div class="leg-item"><div class="leg-dot"></div> Roi / Chef d'État</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ── CONFIG ──
+const NODE_W = 148, NODE_H = 74;
+const H_GAP = 26, V_GAP = 52;
+let scale = 1, translateX = 40, translateY = 60;
+let isDragging = false, dragStart = {x:0,y:0}, dragOrigin = {x:0,y:0};
+let currentDynasty = 'merovingiens';
+let showingAll = false;
+let selectedNodeId = null;
+
+// ── DYNASTY ORDER ──
+const DYN_ORDER = ['merovingiens','carolingiens','capetiens','valois','bourbons','republique1','empire1','restauration','juillet','republique2','empire2','republique3','vichyregime','republique4','republique5'];
+
+// ── FILIATION DATA (parent → children) ──
+// Format: roiId: [childRoiIds]
+const FILIATION = {
+  'clovis-1':       [],
+  'dagobert-1':     [],
+  'pepin-bref':     ['charlemagne'],
+  'charlemagne':    ['louis-pieux'],
+  'louis-pieux':    ['charles-chauve'],
+  'hugues-capet':   ['robert-2'],
+  'robert-2':       ['henri-1'],
+  'henri-1':        ['philippe-1'],
+  'philippe-1':     ['louis-6'],
+  'louis-6':        ['louis-7'],
+  'louis-7':        ['philippe-2'],
+  'philippe-2':     ['louis-8'],
+  'louis-8':        ['louis-9'],
+  'louis-9':        ['philippe-4'],
+  'philippe-4':     ['charles-4'],
+  'charles-4':      [],
+  'philippe-6':     ['jean-2'],
+  'jean-2':         ['charles-5'],
+  'charles-5':      ['charles-6'],
+  'charles-6':      ['charles-7'],
+  'charles-7':      ['louis-11'],
+  'louis-11':       ['charles-8'],
+  'charles-8':      [],
+  'louis-12':       [],
+  'francois-1':     ['henri-2'],
+  'henri-2':        ['francois-2','charles-9','henri-3'],
+  'francois-2':     [],
+  'charles-9':      [],
+  'henri-3':        [],
+  'henri-4':        ['louis-13'],
+  'louis-13':       ['louis-14'],
+  'louis-14':       [],
+  'louis-15':       [],
+  'louis-16':       [],
+  'napoleon-1':     [],
+  'louis-18':       [],
+  'charles-10':     [],
+  'louis-philippe': [],
+  'napoleon-3':     [],
+  'de-gaulle':      [],
+};
+
+// ── LAYOUT: compute positions per dynasty ──
+function layoutDynasty(dynastyId){
+  const rois = HISTORIA.rois.filter(r => r.dynastie === dynastyId);
+  if(!rois.length) return {nodes:[], width:400, height:200};
+
+  // Build parent-child within this dynasty
+  const childMap = {};
+  const hasParent = new Set();
+  rois.forEach(r => {
+    const children = (FILIATION[r.id]||[]).filter(cid => rois.find(rr=>rr.id===cid));
+    childMap[r.id] = children;
+    children.forEach(c => hasParent.add(c));
+  });
+  const roots = rois.filter(r => !hasParent.has(r.id));
+
+  // Assign positions via recursive layout
+  const positions = {};
+  let maxCol = 0;
+
+  function assignPos(roiId, col, row){
+    positions[roiId] = {col, row};
+    if(col > maxCol) maxCol = col;
+    const children = childMap[roiId] || [];
+    children.forEach((cid, i) => assignPos(cid, col + 1, row + i * 1));
+  }
+
+  roots.forEach((r, i) => assignPos(r.id, 0, i));
+
+  // Convert to x/y
+  const nodes = rois.map(r => {
+    const pos = positions[r.id] || {col:0, row:0};
+    return {...r, x: pos.col * (NODE_W + H_GAP), y: pos.row * (NODE_H + V_GAP)};
+  });
+
+  const maxX = Math.max(...nodes.map(n=>n.x)) + NODE_W;
+  const maxY = Math.max(...nodes.map(n=>n.y)) + NODE_H;
+
+  return {nodes, width: Math.max(maxX + 60, 400), height: Math.max(maxY + 60, 200)};
+}
+
+// ── LAYOUT ALL dynasties side by side ──
+function layoutAll(){
+  let offsetX = 40;
+  const allNodes = [];
+  const allEdges = [];
+  const sections = [];
+
+  DYN_ORDER.forEach(dId => {
+    const dyn = HISTORIA.dynasties.find(d=>d.id===dId);
+    if(!dyn) return;
+    const {nodes, width, height} = layoutDynasty(dId);
+    nodes.forEach(n => allNodes.push({...n, x: n.x + offsetX, y: n.y + 80}));
+    sections.push({dyn, x: offsetX, width, height});
+    offsetX += width + 80;
+  });
+
+  // Compute edges
+  HISTORIA.rois.forEach(r => {
+    const parent = allNodes.find(n=>n.id===r.id);
+    if(!parent) return;
+    (FILIATION[r.id]||[]).forEach(cid => {
+      const child = allNodes.find(n=>n.id===cid);
+      if(child) allEdges.push({from: parent, to: child});
+    });
+  });
+
+  return {nodes: allNodes, edges: allEdges, sections, totalWidth: offsetX, totalHeight: 600};
+}
+
+// ── LAYOUT SINGLE DYNASTY ──
+function layoutSingle(dynastyId){
+  const {nodes, width, height} = layoutDynasty(dynastyId);
+  const offsetNodes = nodes.map(n => ({...n, x: n.x + 40, y: n.y + 80}));
+  const edges = [];
+  offsetNodes.forEach(r => {
+    (FILIATION[r.id]||[]).forEach(cid => {
+      const child = offsetNodes.find(n=>n.id===cid);
+      if(child) edges.push({from: r, to: child});
+    });
+  });
+  return {nodes: offsetNodes, edges, totalWidth: width + 80, totalHeight: height + 140};
+}
+
+// ── SVG RENDER ──
+function renderTree(layout){
+  const svg = document.getElementById('tree-svg');
+  const {nodes, edges, sections, totalWidth, totalHeight} = layout;
+  svg.setAttribute('width', totalWidth);
+  svg.setAttribute('height', totalHeight);
+  svg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
+
+  let html = '';
+
+  // Section labels (all view)
+  if(sections){
+    sections.forEach(s => {
+      html += `<text x="${s.x + s.width/2}" y="55" text-anchor="middle" class="dynasty-section-label">${s.dyn.nom.toUpperCase()}</text>`;
+      html += `<line x1="${s.x}" y1="62" x2="${s.x+s.width}" y2="62" stroke="${s.dyn.couleur}" stroke-opacity="0.3" stroke-width="0.5"/>`;
+    });
+  } else {
+    // Single dynasty header
+    const dyn = HISTORIA.dynasties.find(d=>d.id===currentDynasty);
+    if(dyn){
+      html += `<text x="${totalWidth/2}" y="48" text-anchor="middle" class="dynasty-section-label" style="font-size:14px;letter-spacing:6px">${dyn.nom.toUpperCase()}</text>`;
+      html += `<text x="${totalWidth/2}" y="66" text-anchor="middle" font-family="EB Garamond,serif" font-style="italic" font-size="12" fill="rgba(201,168,76,0.4)">${dyn.debut} – ${dyn.fin===9999?'présent':dyn.fin}</text>`;
+    }
+  }
+
+  // Edges
+  edges.forEach(e => {
+    const x1 = e.from.x + NODE_W;
+    const y1 = e.from.y + NODE_H/2;
+    const x2 = e.to.x;
+    const y2 = e.to.y + NODE_H/2;
+    const mx = (x1 + x2) / 2;
+    // Check if same dynasty
+    const sameDyn = e.from.dynastie === e.to.dynastie;
+    const col = sameDyn ? `rgba(201,168,76,0.28)` : `rgba(201,168,76,0.12)`;
+    html += `<path d="M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}" stroke="${col}" stroke-width="1" fill="none"/>`;
+  });
+
+  // Nodes
+  nodes.forEach(r => {
+    const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+    const col = dyn ? dyn.couleur : '#888';
+    const isSelected = r.id === selectedNodeId;
+    const nameLines = splitName(r.nom);
+    const y = r.y;
+
+    html += `<g class="king-node" data-id="${r.id}" onclick="onNodeClick('${r.id}')" onmouseenter="onNodeHover(event,'${r.id}')" onmouseleave="onNodeLeave()">`;
+    // Glow
+    html += `<rect class="node-glow" x="${r.x-4}" y="${y-4}" width="${NODE_W+8}" height="${NODE_H+8}" rx="6" fill="${col}" opacity="0.08"/>`;
+    // Card
+    html += `<rect class="king-card-bg${isSelected?' selected':''}" x="${r.x}" y="${y}" width="${NODE_W}" height="${NODE_H}" rx="4"/>`;
+    // Dynasty color bar
+    html += `<rect x="${r.x}" y="${y}" width="4" height="${NODE_H}" rx="2" fill="${col}" opacity="0.7"/>`;
+    // Crown/emoji
+    html += `<text x="${r.x+16}" y="${y+24}" text-anchor="middle" font-size="14" fill="rgba(201,168,76,0.8)">${r.portrait_emoji||'👑'}</text>`;
+    // Name
+    if(nameLines.length === 1){
+      html += `<text class="king-name" x="${r.x+28}" y="${y+22}" font-size="11">${nameLines[0]}</text>`;
+    } else {
+      html += `<text class="king-name" x="${r.x+28}" y="${y+16}" font-size="10">${nameLines[0]}</text>`;
+      html += `<text class="king-name" x="${r.x+28}" y="${y+28}" font-size="10">${nameLines[1]}</text>`;
+    }
+    // Surnom
+    if(r.surnom){
+      html += `<text class="king-surnom" x="${r.x+28}" y="${y+40}" font-size="9">"${r.surnom.substring(0,22)}"</text>`;
+    }
+    // Dates règne
+    html += `<text class="king-dates" x="${r.x+16}" y="${y+58}" font-size="9">${r.debut_regne}–${r.fin_regne||'†'}</text>`;
+    // Naissance-mort
+    html += `<text class="king-dates" x="${r.x+NODE_W-6}" y="${y+58}" text-anchor="end" font-size="9" opacity="0.5">✦${r.naissance||'?'}–${r.mort||'?'}</text>`;
+    html += '</g>';
+  });
+
+  svg.innerHTML = html;
+  applyTransform();
+}
+
+function splitName(nom){
+  if(nom.length <= 16) return [nom];
+  const parts = nom.split(' ');
+  if(parts.length <= 2) return [nom];
+  const mid = Math.ceil(parts.length/2);
+  return [parts.slice(0,mid).join(' '), parts.slice(mid).join(' ')];
+}
+
+// ── TRANSFORM ──
+function applyTransform(){
+  document.getElementById('tree-svg').style.transform = `scale(${scale}) translate(${translateX/scale}px,${translateY/scale}px)`;
+  document.getElementById('tree-svg').style.transformOrigin = '0 0';
+}
+
+function zoomIn(){ scale = Math.min(scale * 1.25, 3); applyTransform(); }
+function zoomOut(){ scale = Math.max(scale / 1.25, 0.2); applyTransform(); }
+function resetZoom(){ scale=1; translateX=40; translateY=20; applyTransform(); }
+
+// ── HOVER ──
+let currentLayout = null;
+function onNodeHover(event, roiId){
+  const r = HISTORIA.rois.find(r=>r.id===roiId);
+  if(!r) return;
+  const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+  document.getElementById('hc-type').textContent = (dyn?.nom||'').toUpperCase();
+  document.getElementById('hc-name').textContent = r.nom;
+  document.getElementById('hc-dates').textContent = `${r.naissance||'?'} – ${r.mort||'?'}`;
+  document.getElementById('hc-resume').textContent = (r.resume||'').substring(0,120) + '…';
+  document.getElementById('hc-grid').innerHTML = `
+    <div class="hc-cell"><span class="hc-cell-lbl">RÈGNE</span><span class="hc-cell-val">${r.debut_regne}–${r.fin_regne||'?'}</span></div>
+    <div class="hc-cell"><span class="hc-cell-lbl">ÉPOUSE</span><span class="hc-cell-val">${(r.epouse||'?').split(',')[0].substring(0,20)}</span></div>
+    <div class="hc-cell"><span class="hc-cell-lbl">NÉ À</span><span class="hc-cell-val">${r.lieu_naissance||'?'}</span></div>
+    <div class="hc-cell"><span class="hc-cell-lbl">MORT À</span><span class="hc-cell-val">${r.lieu_mort||'?'}</span></div>`;
+  const card = document.getElementById('hoverCard');
+  const rect = event.target.closest('.king-node')?.getBoundingClientRect();
+  if(rect){
+    let left = rect.right + 12;
+    let top = rect.top + rect.height/2;
+    if(left + 250 > window.innerWidth) left = rect.left - 252;
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+  }
+  card.classList.add('show');
+}
+function onNodeLeave(){ document.getElementById('hoverCard').classList.remove('show'); }
+
+// ── CLICK (detail panel) ──
+function onNodeClick(roiId){
+  selectedNodeId = roiId;
+  const r = HISTORIA.rois.find(r=>r.id===roiId);
+  if(!r) return;
+  const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+  const faits = (r.faits||[]).map(f=>`<li>${f}</li>`).join('');
+  const enfants = (r.enfants||[]).join(', ') || '—';
+
+  document.getElementById('detailScroll').innerHTML = `
+    <span class="d-emoji">${r.portrait_emoji||'👑'}</span>
+    <div class="d-type">${(dyn?.nom||'').toUpperCase()}</div>
+    <div class="d-name">${r.nom}</div>
+    ${r.surnom?`<div class="d-surnom">"${r.surnom}"</div>`:''}
+    <div class="d-divider"></div>
+    <div class="d-meta-grid">
+      <div class="d-meta-item"><span class="d-meta-lbl">NAISSANCE</span><span class="d-meta-val">${r.naissance||'?'}<br><small style="opacity:.6">${r.lieu_naissance||''}</small></span></div>
+      <div class="d-meta-item"><span class="d-meta-lbl">MORT</span><span class="d-meta-val">${r.mort||'?'}<br><small style="opacity:.6">${r.lieu_mort||''}</small></span></div>
+      <div class="d-meta-item"><span class="d-meta-lbl">DÉBUT DU RÈGNE</span><span class="d-meta-val">${r.debut_regne}</span></div>
+      <div class="d-meta-item"><span class="d-meta-lbl">FIN DU RÈGNE</span><span class="d-meta-val">${r.fin_regne||'?'}</span></div>
+      <div class="d-meta-item" style="grid-column:span 2"><span class="d-meta-lbl">ÉPOUSE(S)</span><span class="d-meta-val">${r.epouse||'?'}</span></div>
+      <div class="d-meta-item" style="grid-column:span 2"><span class="d-meta-lbl">ENFANTS (successeurs)</span><span class="d-meta-val">${enfants}</span></div>
+    </div>
+    <div class="d-section-title">BIOGRAPHIE</div>
+    <p class="d-text" style="margin-bottom:1rem">${r.resume||''}</p>
+    ${faits?`<div class="d-section-title">FAITS MARQUANTS</div><ul class="d-facts" style="margin-bottom:1rem">${faits}</ul>`:''}
+    <div class="d-divider"></div>
+    <a href="roi.html?id=${r.id}" class="d-link">Lire la fiche complète →</a>
+    <a href="frise.html" class="d-link" style="margin-top:.5rem;opacity:.6">Voir sur la frise →</a>`;
+  document.getElementById('detailPanel').classList.add('open');
+  // Re-render to highlight selection
+  if(currentLayout) renderTree(currentLayout);
+}
+function closeDetail(){
+  document.getElementById('detailPanel').classList.remove('open');
+  selectedNodeId = null;
+  if(currentLayout) renderTree(currentLayout);
+}
+
+// ── DYNASTY TABS ──
+function buildTabs(){
+  const el = document.getElementById('dynTabs');
+  el.innerHTML = '';
+  // "Tout" tab
+  const allTab = document.createElement('button');
+  allTab.className = 'dyn-tab';
+  allTab.textContent = 'TOUTES';
+  allTab.dataset.id = 'all';
+  allTab.addEventListener('click', ()=>switchDynasty('all'));
+  el.appendChild(allTab);
+  // Separator
+  const sep = document.createElement('div');
+  sep.style.cssText='width:1px;height:20px;background:rgba(201,168,76,.12);margin:0 6px;flex-shrink:0';
+  el.appendChild(sep);
+
+  DYN_ORDER.forEach(dId => {
+    const dyn = HISTORIA.dynasties.find(d=>d.id===dId);
+    if(!dyn) return;
+    const rois = HISTORIA.rois.filter(r=>r.dynastie===dId);
+    if(!rois.length) return;
+    const tab = document.createElement('button');
+    tab.className = 'dyn-tab';
+    tab.textContent = dyn.nom.toUpperCase();
+    tab.dataset.id = dId;
+    tab.style.borderBottomColor = 'transparent';
+    tab.addEventListener('click', ()=>switchDynasty(dId));
+    el.appendChild(tab);
+  });
+  updateActiveTabs();
+}
+
+function updateActiveTabs(){
+  document.querySelectorAll('.dyn-tab').forEach(t => {
+    const active = (showingAll && t.dataset.id==='all') || (!showingAll && t.dataset.id===currentDynasty);
+    t.classList.toggle('active', active);
+    if(active && t.dataset.id!=='all'){
+      const dyn = HISTORIA.dynasties.find(d=>d.id===t.dataset.id);
+      t.style.borderBottomColor = dyn ? dyn.couleur : 'var(--gold)';
+    } else if(!active){
+      t.style.borderBottomColor = 'transparent';
+    }
+  });
+}
+
+function switchDynasty(dId){
+  closeDetail();
+  if(dId === 'all'){
+    showingAll = true;
+    const layout = layoutAll();
+    currentLayout = layout;
+    renderTree(layout);
+    scale = 0.45; translateX = 20; translateY = 20;
+    applyTransform();
+  } else {
+    showingAll = false;
+    currentDynasty = dId;
+    const layout = layoutSingle(dId);
+    currentLayout = layout;
+    renderTree(layout);
+    scale = 1; translateX = 40; translateY = 20;
+    applyTransform();
+  }
+  updateActiveTabs();
+}
+
+function toggleAll(){
+  switchDynasty(showingAll ? currentDynasty : 'all');
+}
+
+// ── DRAG PAN ──
+function initDrag(){
+  const wrap = document.getElementById('canvasWrap');
+  wrap.addEventListener('mousedown', e=>{
+    if(e.button!==0||e.target.closest('.king-node')) return;
+    isDragging=true;
+    dragStart={x:e.clientX,y:e.clientY};
+    dragOrigin={x:translateX,y:translateY};
+    wrap.style.cursor='grabbing';
+  });
+  document.addEventListener('mouseup',()=>{ isDragging=false; document.getElementById('canvasWrap').style.cursor='grab'; });
+  wrap.addEventListener('mousemove',e=>{
+    if(!isDragging) return;
+    translateX = dragOrigin.x + (e.clientX - dragStart.x);
+    translateY = dragOrigin.y + (e.clientY - dragStart.y);
+    applyTransform();
+  });
+  wrap.addEventListener('wheel',e=>{
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 1.1 : 0.9;
+    scale = Math.max(0.2, Math.min(3, scale * delta));
+    applyTransform();
+  },{passive:false});
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeDetail();
+  if(e.key==='+') zoomIn();
+  if(e.key==='-') zoomOut();
+  if(e.key==='0') resetZoom();
+});
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded', ()=>{
+  buildTabs();
+  switchDynasty('merovingiens');
+  initDrag();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Personnages — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-dim:#7A6230;--gold-faint:rgba(201,168,76,0.08);
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+}
+html{scroll-behavior:smooth}
+body{background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif;min-height:100vh;padding-top:52px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.97);border-bottom:1px solid rgba(201,168,76,.18)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-links{display:flex;gap:1.5rem}
+.nav-link{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-link:hover{opacity:1;color:var(--gold)}
+
+/* HERO BAND */
+.page-hero{padding:3.5rem 2rem 2.5rem;background:linear-gradient(180deg,var(--stone-light) 0%,var(--stone) 100%);border-bottom:1px solid rgba(201,168,76,.1);position:relative;overflow:hidden}
+.page-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 100% at 10% 50%,rgba(201,168,76,.05) 0,transparent 70%)}
+.page-hero-inner{max-width:1200px;margin:0 auto;position:relative}
+.page-hero-tag{font-family:'Cinzel',serif;font-size:9px;letter-spacing:5px;color:var(--gold-dim);margin-bottom:.75rem}
+.page-hero-title{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,3.5rem);font-weight:900;color:var(--parchment);line-height:.95;margin-bottom:.75rem}
+.page-hero-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--parchment-dim);opacity:.75}
+.page-hero-stats{display:flex;gap:2rem;margin-top:1.5rem;flex-wrap:wrap}
+.stat-pill{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);padding:.3rem .8rem;border:1px solid rgba(201,168,76,.15)}
+
+/* FILTERS */
+.filters-bar{background:var(--stone-mid);border-bottom:1px solid rgba(201,168,76,.08);padding:.75rem 2rem;position:sticky;top:52px;z-index:100}
+.filters-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.filter-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);flex-shrink:0;opacity:.7}
+.filter-sep{width:1px;height:18px;background:rgba(201,168,76,.12);flex-shrink:0}
+.f-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;padding:4px 12px;border:1px solid rgba(201,168,76,.18);background:transparent;color:var(--parchment-dim);cursor:pointer;transition:all .2s;white-space:nowrap}
+.f-btn:hover{border-color:rgba(201,168,76,.4);color:var(--parchment)}
+.f-btn.active{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold)}
+.search-box{margin-left:auto;position:relative}
+.search-input{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.15);color:var(--parchment);font-family:'EB Garamond',serif;font-size:14px;padding:.35rem .75rem .35rem 1.8rem;width:200px;outline:none;transition:border-color .2s}
+.search-input:focus{border-color:rgba(201,168,76,.4)}
+.search-input::placeholder{color:var(--parchment-dim);opacity:.4}
+.search-icon{position:absolute;left:.55rem;top:50%;transform:translateY(-50%);font-size:12px;opacity:.4;pointer-events:none}
+
+/* MAIN */
+.main-wrap{max-width:1200px;margin:0 auto;padding:2.5rem 2rem}
+
+/* SECTION HEADERS */
+.section-head{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;margin-top:2.5rem}
+.section-head:first-child{margin-top:0}
+.section-head-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold-dim)}
+.section-head-line{flex:1;height:1px;background:linear-gradient(90deg,rgba(201,168,76,.2),transparent)}
+.section-head-count{font-family:'Cinzel',serif;font-size:9px;color:var(--gold-dim);opacity:.5}
+
+/* KINGS GRID */
+.kings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1px;background:rgba(201,168,76,.06)}
+
+.king-card{background:var(--stone-card);padding:1.25rem;cursor:pointer;transition:all .25s;border:1px solid transparent;position:relative;overflow:hidden}
+.king-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--card-color,var(--gold-dim));opacity:.6;transition:opacity .25s}
+.king-card:hover{border-color:rgba(201,168,76,.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.king-card:hover::before{opacity:1}
+.king-card-emoji{font-size:1.8rem;margin-bottom:.6rem;display:block;line-height:1}
+.king-card-name{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--parchment);line-height:1.2;margin-bottom:.2rem}
+.king-card-surnom{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.85rem;color:var(--gold-dim);margin-bottom:.4rem}
+.king-card-dates{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--parchment-dim);opacity:.5;margin-bottom:.5rem}
+.king-card-resume{font-size:12px;color:var(--parchment-dim);opacity:.7;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.king-card-dynasty{position:absolute;top:.75rem;right:.75rem;font-family:'Cinzel',serif;font-size:7px;letter-spacing:1px;color:var(--parchment-dim);opacity:.4}
+.king-card-hidden{display:none}
+
+/* FIGURES GRID (secondary characters) */
+.figures-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+
+.figure-card{background:var(--stone-card);border:1px solid rgba(201,168,76,.08);padding:1.25rem;cursor:pointer;transition:all .25s;display:flex;gap:1rem;align-items:flex-start;position:relative}
+.figure-card:hover{border-color:rgba(201,168,76,.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.figure-emoji{font-size:2rem;flex-shrink:0;width:48px;height:48px;display:flex;align-items:center;justify-content:center;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.1)}
+.figure-content{flex:1;min-width:0}
+.figure-name{font-family:'Cinzel',serif;font-size:.88rem;font-weight:700;color:var(--parchment);margin-bottom:.15rem}
+.figure-role{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);margin-bottom:.4rem}
+.figure-dates{font-size:11px;color:var(--parchment-dim);opacity:.5;margin-bottom:.4rem}
+.figure-resume{font-size:12px;color:var(--parchment-dim);opacity:.7;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.figure-hidden{display:none}
+
+/* DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity .3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--stone-card);border:1px solid rgba(201,168,76,.25);width:100%;max-width:620px;max-height:88vh;overflow-y:auto;position:relative;transform:translateY(20px);transition:transform .3s;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
+.modal-overlay.open .modal-box{transform:translateY(0)}
+.modal-box::-webkit-scrollbar{width:4px}
+.modal-box::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2)}
+.modal-close{position:sticky;top:0;display:flex;justify-content:flex-end;padding:.75rem .75rem 0;background:var(--stone-card);z-index:1}
+.modal-close-btn{width:30px;height:30px;border:1px solid rgba(201,168,76,.2);background:transparent;color:var(--gold-dim);font-size:18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.modal-close-btn:hover{border-color:var(--gold);color:var(--gold)}
+.modal-body{padding:0 1.75rem 1.75rem}
+.modal-emoji{font-size:3rem;display:block;margin-bottom:.75rem;line-height:1}
+.modal-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:.4rem}
+.modal-name{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:900;color:var(--parchment);line-height:1.1;margin-bottom:.25rem}
+.modal-surnom{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--gold-dim);margin-bottom:1rem}
+.modal-divider{height:1px;background:linear-gradient(90deg,rgba(201,168,76,.25),transparent);margin:1rem 0}
+.modal-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.modal-meta-item{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.08);padding:.5rem .7rem}
+.modal-meta-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.15rem}
+.modal-meta-val{font-size:13px;color:var(--parchment-dim);line-height:1.4}
+.modal-section-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.5rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.08)}
+.modal-text{font-size:15px;line-height:1.75;color:var(--parchment-dim);margin-bottom:1rem}
+.modal-facts{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.modal-facts li{font-size:14px;color:var(--parchment-dim);padding-left:1.2rem;position:relative;line-height:1.5}
+.modal-facts li::before{content:'◆';position:absolute;left:0;color:var(--gold-dim);font-size:7px;top:.4rem}
+.modal-actions{display:flex;gap:.5rem;margin-top:1rem;flex-wrap:wrap}
+.modal-action{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:.6rem 1rem;border:1px solid rgba(201,168,76,.25);color:var(--gold);background:transparent;cursor:pointer;text-decoration:none;transition:all .2s}
+.modal-action:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:4rem 2rem;font-family:'Cinzel',serif;color:var(--gold-dim);opacity:.5;grid-column:1/-1}
+.empty-state p{font-size:13px;margin-top:.5rem;letter-spacing:2px}
+
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:.3rem;margin-left:auto}
+.vt-btn{width:28px;height:28px;border:1px solid rgba(201,168,76,.15);background:transparent;color:var(--parchment-dim);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.vt-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+@media(max-width:600px){
+  .kings-grid{grid-template-columns:repeat(2,1fr)}
+  .figures-grid{grid-template-columns:1fr}
+  .modal-meta-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <div class="nav-links">
+    <a href="frise.html" class="nav-link">Frise</a>
+    <a href="genealogie.html" class="nav-link">Généalogie</a>
+    <a href="recits.html" class="nav-link">Récits</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="page-hero-inner">
+    <div class="page-hero-tag">GALERIE HISTORIQUE</div>
+    <h1 class="page-hero-title">Personnages<br>de France</h1>
+    <p class="page-hero-sub">Des rois aux figures de l'ombre — tous ceux qui ont fait l'histoire.</p>
+    <div class="page-hero-stats" id="heroStats"></div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<div class="filters-bar">
+  <div class="filters-inner">
+    <span class="filter-label">ÉPOQUE</span>
+    <button class="f-btn active" data-filter-era="all" onclick="filterEra('all',this)">Toutes</button>
+    <button class="f-btn" data-filter-era="moyen-age" onclick="filterEra('moyen-age',this)">Moyen Âge</button>
+    <button class="f-btn" data-filter-era="renaissance" onclick="filterEra('renaissance',this)">Renaissance</button>
+    <button class="f-btn" data-filter-era="ancien-regime" onclick="filterEra('ancien-regime',this)">Ancien Régime</button>
+    <button class="f-btn" data-filter-era="revolution" onclick="filterEra('revolution',this)">Révolution</button>
+    <button class="f-btn" data-filter-era="moderne" onclick="filterEra('moderne',this)">Époque moderne</button>
+    <div class="filter-sep"></div>
+    <button class="f-btn active" data-filter-type="rois" onclick="filterType('rois',this)">👑 Rois</button>
+    <button class="f-btn active" data-filter-type="figures" onclick="filterType('figures',this)">⚔ Figures clés</button>
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" id="searchInput" type="text" placeholder="Rechercher…" oninput="onSearch(this.value)">
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+  <!-- ROIS -->
+  <div id="kings-section">
+    <div class="section-head">
+      <span class="section-head-title">ROIS & CHEFS D'ÉTAT</span>
+      <div class="section-head-line"></div>
+      <span class="section-head-count" id="kings-count"></span>
+    </div>
+    <div class="kings-grid" id="kingsGrid"></div>
+  </div>
+
+  <!-- FIGURES HISTORIQUES -->
+  <div id="figures-section" style="margin-top:3rem">
+    <div class="section-head">
+      <span class="section-head-title">FIGURES HISTORIQUES</span>
+      <div class="section-head-line"></div>
+      <span class="section-head-count" id="figures-count"></span>
+    </div>
+    <div class="figures-grid" id="figuresGrid"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-close">
+      <button class="modal-close-btn" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ── ERA MAPPING ──
+function getEra(r){
+  const y = r.debut_regne || r.naissance || 0;
+  if(y < 1000) return 'moyen-age';
+  if(y < 1500) return 'moyen-age';
+  if(y < 1610) return 'renaissance';
+  if(y < 1789) return 'ancien-regime';
+  if(y < 1815) return 'revolution';
+  return 'moderne';
+}
+
+// ── STATE ──
+let eraFilter = 'all';
+let showRois = true;
+let showFigures = true;
+let searchTerm = '';
+
+// ── DYNASTY COLOR ──
+function dynColor(dynastieId){
+  const d = HISTORIA.dynasties.find(dd=>dd.id===dynastieId);
+  return d ? d.couleur : '#C9A84C';
+}
+
+// ── BUILD KINGS GRID ──
+function buildKings(){
+  const grid = document.getElementById('kingsGrid');
+  grid.innerHTML = '';
+  let visible = 0;
+
+  HISTORIA.rois.forEach(r => {
+    const era = getEra(r);
+    const col = dynColor(r.dynastie);
+    const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+    const hidden = (eraFilter!=='all' && era!==eraFilter) ||
+                   !showRois ||
+                   (searchTerm && !r.nom.toLowerCase().includes(searchTerm) &&
+                    !(r.surnom||'').toLowerCase().includes(searchTerm) &&
+                    !(r.resume||'').toLowerCase().includes(searchTerm));
+    if(!hidden) visible++;
+
+    const card = document.createElement('div');
+    card.className = 'king-card' + (hidden ? ' king-card-hidden' : '');
+    card.dataset.id = r.id;
+    card.dataset.era = era;
+    card.style.setProperty('--card-color', col);
+    card.innerHTML = `
+      <span class="king-card-dynasty">${(dyn?.nom||'').substring(0,12).toUpperCase()}</span>
+      <span class="king-card-emoji">${r.portrait_emoji||'👑'}</span>
+      <div class="king-card-name">${r.nom}</div>
+      ${r.surnom?`<div class="king-card-surnom">"${r.surnom}"</div>`:''}
+      <div class="king-card-dates">${r.debut_regne} – ${r.fin_regne||'?'} &nbsp;·&nbsp; ${r.naissance||'?'}–${r.mort||'?'}</div>
+      <p class="king-card-resume">${r.resume||''}</p>`;
+    card.addEventListener('click', ()=>openKingModal(r));
+    grid.appendChild(card);
+  });
+
+  // Empty state
+  if(visible === 0){
+    grid.innerHTML = '<div class="empty-state">Aucun souverain<p>Modifier les filtres</p></div>';
+  }
+  document.getElementById('kings-count').textContent = visible + ' souverains';
+}
+
+// ── BUILD FIGURES GRID ──
+function buildFigures(){
+  const grid = document.getElementById('figuresGrid');
+  grid.innerHTML = '';
+  let visible = 0;
+
+  HISTORIA.personnages.forEach(p => {
+    const hidden = !showFigures ||
+                   (searchTerm && !p.nom.toLowerCase().includes(searchTerm) &&
+                    !(p.role||'').toLowerCase().includes(searchTerm) &&
+                    !(p.resume||'').toLowerCase().includes(searchTerm));
+    if(!hidden) visible++;
+
+    const card = document.createElement('div');
+    card.className = 'figure-card' + (hidden ? ' figure-hidden' : '');
+    card.innerHTML = `
+      <div class="figure-emoji">${p.portrait_emoji||'⚔'}</div>
+      <div class="figure-content">
+        <div class="figure-name">${p.nom}</div>
+        <div class="figure-role">${(p.role||'').toUpperCase()}</div>
+        <div class="figure-dates">${p.dates||''}</div>
+        <p class="figure-resume">${p.resume||''}</p>
+      </div>`;
+    card.addEventListener('click', ()=>openFigureModal(p));
+    grid.appendChild(card);
+  });
+
+  if(visible === 0){
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1">Aucune figure<p>Modifier les filtres</p></div>';
+  }
+  document.getElementById('figures-count').textContent = visible + ' figures';
+}
+
+// ── FILTERS ──
+function filterEra(era, btn){
+  eraFilter = era;
+  document.querySelectorAll('[data-filter-era]').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildKings();
+}
+
+function filterType(type, btn){
+  if(type==='rois') showRois = !showRois;
+  if(type==='figures') showFigures = !showFigures;
+  btn.classList.toggle('active', type==='rois' ? showRois : showFigures);
+  buildKings();
+  buildFigures();
+  document.getElementById('kings-section').style.display = showRois ? '' : 'none';
+  document.getElementById('figures-section').style.display = showFigures ? '' : 'none';
+}
+
+function onSearch(val){
+  searchTerm = val.toLowerCase().trim();
+  buildKings();
+  buildFigures();
+}
+
+// ── MODALS ──
+function openKingModal(r){
+  const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+  const faits = (r.faits||[]).map(f=>`<li>${f}</li>`).join('');
+  const batailles = (r.batailles_liees||[]).map(bid=>{
+    const b = HISTORIA.batailles.find(bb=>bb.id===bid);
+    return b ? `<li>${b.nom} (${b.date})</li>` : '';
+  }).join('');
+  const periodes = (r.periodes_liees||[]).map(pid=>{
+    const p = HISTORIA.periodes.find(pp=>pp.id===pid);
+    return p ? `<a href="periode.html?id=${p.id}" class="modal-action">${p.titre} →</a>` : '';
+  }).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <span class="modal-emoji">${r.portrait_emoji||'👑'}</span>
+    <div class="modal-type">${(dyn?.nom||'').toUpperCase()}</div>
+    <div class="modal-name">${r.nom}</div>
+    ${r.surnom?`<div class="modal-surnom">"${r.surnom}"</div>`:''}
+    <div class="modal-divider"></div>
+    <div class="modal-meta-grid">
+      <div class="modal-meta-item"><span class="modal-meta-lbl">NAISSANCE</span><span class="modal-meta-val">${r.naissance||'?'} · ${r.lieu_naissance||'?'}</span></div>
+      <div class="modal-meta-item"><span class="modal-meta-lbl">MORT</span><span class="modal-meta-val">${r.mort||'?'} · ${r.lieu_mort||'?'}</span></div>
+      <div class="modal-meta-item"><span class="modal-meta-lbl">RÈGNE</span><span class="modal-meta-val">${r.debut_regne} – ${r.fin_regne||'?'}</span></div>
+      <div class="modal-meta-item"><span class="modal-meta-lbl">ÉPOUSE(S)</span><span class="modal-meta-val">${(r.epouse||'?').split(',')[0]}</span></div>
+    </div>
+    <div class="modal-section-title">BIOGRAPHIE</div>
+    <p class="modal-text">${r.resume||''}</p>
+    ${faits?`<div class="modal-section-title">FAITS MARQUANTS</div><ul class="modal-facts">${faits}</ul>`:''}
+    ${batailles?`<div class="modal-section-title">BATAILLES LIÉES</div><ul class="modal-facts">${batailles}</ul>`:''}
+    <div class="modal-actions">
+      <a href="roi.html?id=${r.id}" class="modal-action">Fiche complète →</a>
+      <a href="frise.html" class="modal-action">Voir sur la frise →</a>
+      <a href="genealogie.html" class="modal-action">Arbre généalogique →</a>
+      ${periodes}
+    </div>`;
+  openModal();
+}
+
+function openFigureModal(p){
+  const faits = (p.faits||[]).map(f=>`<li>${f}</li>`).join('');
+  const periode = HISTORIA.periodes.find(pp=>pp.id===p.epoque);
+
+  document.getElementById('modalBody').innerHTML = `
+    <span class="modal-emoji">${p.portrait_emoji||'⚔'}</span>
+    <div class="modal-type">${(p.role||'').toUpperCase()}</div>
+    <div class="modal-name">${p.nom}</div>
+    <div class="modal-divider"></div>
+    <div class="modal-meta-grid">
+      <div class="modal-meta-item"><span class="modal-meta-lbl">DATES</span><span class="modal-meta-val">${p.dates||'?'}</span></div>
+      <div class="modal-meta-item"><span class="modal-meta-lbl">ÉPOQUE</span><span class="modal-meta-val">${periode?.titre||p.epoque||'?'}</span></div>
+    </div>
+    <div class="modal-section-title">BIOGRAPHIE</div>
+    <p class="modal-text">${p.resume||''}</p>
+    ${faits?`<div class="modal-section-title">FAITS MARQUANTS</div><ul class="modal-facts">${faits}</ul>`:''}
+    <div class="modal-actions">
+      ${periode?`<a href="periode.html?id=${periode.id}" class="modal-action">${periode.titre} →</a>`:''}
+      <a href="frise.html" class="modal-action">Voir sur la frise →</a>
+    </div>`;
+  openModal();
+}
+
+function openModal(){
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(e){
+  if(e && e.target!==document.getElementById('modalOverlay') && !e.target.closest('.modal-close-btn')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal({}); });
+
+// ── HERO STATS ──
+function buildHeroStats(){
+  const el = document.getElementById('heroStats');
+  const dynasties = new Set(HISTORIA.rois.map(r=>r.dynastie)).size;
+  el.innerHTML = `
+    <div class="stat-pill">${HISTORIA.rois.length} SOUVERAINS</div>
+    <div class="stat-pill">${HISTORIA.personnages.length} FIGURES HISTORIQUES</div>
+    <div class="stat-pill">${dynasties} DYNASTIES</div>
+    <div class="stat-pill">481 – 1969</div>`;
+}
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  buildHeroStats();
+  buildKings();
+  buildFigures();
+});
+</script>
+</body>
+</html>

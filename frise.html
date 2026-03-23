@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frise Chronologique — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--gold-dim:#7A6230;--gold-faint:rgba(201,168,76,0.12);
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#221E14;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;--parchment-faint:rgba(240,230,204,0.06);
+  --ink:#0D0A06;--crimson:#8B1A1A;--royal:#1A2E5A;
+  --band-h:56px;--ruler-h:48px;--axis-y:220px;
+  --px-per-year:3.2px;
+  --total-years:1488;
+}
+html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,0.95);border-bottom:1px solid rgba(201,168,76,0.18);backdrop-filter:blur(8px)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-back{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-back:hover{opacity:1;color:var(--gold)}
+
+/* ── FILTER BAR ── */
+.filter-bar{position:fixed;top:52px;left:0;right:0;z-index:190;height:44px;display:flex;align-items:center;gap:.5rem;padding:0 1.5rem;background:rgba(13,10,6,.96);border-bottom:1px solid rgba(201,168,76,.1)}
+.filter-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:5px 14px;border:1px solid rgba(201,168,76,.25);background:transparent;color:var(--parchment-dim);cursor:pointer;transition:all .2s;white-space:nowrap}
+.filter-btn.active{border-color:var(--gold);background:rgba(201,168,76,.12);color:var(--gold)}
+.filter-btn:hover{border-color:rgba(201,168,76,.5);color:var(--parchment)}
+.filter-sep{width:1px;height:20px;background:rgba(201,168,76,.15);margin:0 .25rem}
+.dynasty-filter{display:flex;align-items:center;gap:.4rem;margin-left:auto;overflow-x:auto;scrollbar-width:none}
+.dynasty-filter::-webkit-scrollbar{display:none}
+.dyn-dot{width:10px;height:10px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;flex-shrink:0}
+.dyn-dot.active{transform:scale(1.35);border-color:rgba(255,255,255,.4)}
+.zoom-controls{display:flex;align-items:center;gap:.3rem;margin-left:.75rem}
+.zoom-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:15px;border:1px solid rgba(201,168,76,.25);background:transparent;color:var(--gold-dim);cursor:pointer;transition:all .2s;flex-shrink:0}
+.zoom-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── MAIN LAYOUT ── */
+.main{position:fixed;top:96px;left:0;right:0;bottom:0;display:flex;flex-direction:column}
+
+/* ── MAP PANEL ── */
+.map-panel{height:200px;flex-shrink:0;background:var(--stone-mid);border-bottom:1px solid rgba(201,168,76,.15);position:relative;overflow:hidden}
+.map-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative}
+#france-map{width:auto;height:170px;opacity:.85}
+.map-era-label{position:absolute;top:10px;left:16px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim)}
+.map-year-label{position:absolute;top:10px;right:16px;font-family:'Cinzel',serif;font-size:18px;font-weight:700;color:var(--gold);opacity:.7}
+.map-dynasty-label{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--parchment-dim);opacity:.8;white-space:nowrap}
+/* Colored overlay on map for territory */
+.map-territory{position:absolute;inset:0;pointer-events:none;transition:opacity .6s}
+
+/* ── SCROLL CONTAINER ── */
+.scroll-wrap{flex:1;overflow-x:auto;overflow-y:hidden;position:relative;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.3) transparent;cursor:grab}
+.scroll-wrap:active{cursor:grabbing}
+.scroll-wrap::-webkit-scrollbar{height:6px}
+.scroll-wrap::-webkit-scrollbar-track{background:transparent}
+.scroll-wrap::-webkit-scrollbar-thumb{background:rgba(201,168,76,.25);border-radius:3px}
+
+/* ── TIMELINE CANVAS ── */
+.timeline{position:relative;height:100%;display:flex;flex-direction:column}
+.timeline-inner{position:relative;height:100%}
+
+/* ── DYNASTY BANDS ── */
+.dynasty-bands{position:absolute;top:0;left:0;height:var(--band-h);display:flex}
+.dynasty-band{height:var(--band-h);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-right:1px solid rgba(0,0,0,.3)}
+.dynasty-band-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.7);white-space:nowrap;pointer-events:none;mix-blend-mode:luminosity;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+
+/* ── CENTURY RULER ── */
+.ruler{position:absolute;top:var(--band-h);left:0;height:var(--ruler-h);display:flex;align-items:flex-end;pointer-events:none}
+.ruler-tick{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center}
+.ruler-tick-line{width:1px;background:rgba(201,168,76,.35)}
+.ruler-tick-line.major{background:rgba(201,168,76,.6);width:1px}
+.ruler-tick-label{font-family:'Cinzel',serif;font-size:9px;color:var(--gold-dim);letter-spacing:1px;margin-bottom:4px;white-space:nowrap}
+
+/* ── CENTER AXIS LINE ── */
+.axis-line{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4) 5%,rgba(201,168,76,.4) 95%,transparent);pointer-events:none}
+
+/* ── EVENTS ── */
+.event-group{position:absolute;top:0}
+.event-dot{position:absolute;cursor:pointer;transition:transform .2s,opacity .2s;z-index:10}
+.event-dot:hover{z-index:20}
+.event-dot .dot-inner{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.3);transition:all .25s;position:relative}
+.event-dot:hover .dot-inner{transform:scale(1.6);border-color:rgba(255,255,255,.7)}
+.event-dot.type-roi .dot-inner{background:var(--gold)}
+.event-dot.type-bataille .dot-inner{background:#C04030;border-color:rgba(255,100,80,.4)}
+.event-dot.type-evenement .dot-inner{background:#4A7AB5;border-color:rgba(74,122,181,.4)}
+.event-dot.type-periode .dot-inner{background:#3A8A5A;border-color:rgba(58,138,90,.4);border-radius:2px;width:12px;height:12px}
+.event-label{position:absolute;font-family:'EB Garamond',serif;font-size:11px;color:var(--parchment-dim);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s;background:rgba(13,10,6,.85);padding:2px 5px}
+.event-dot:hover .event-label{opacity:1}
+
+/* ── REIGN BARS (rois) ── */
+.reign-bar{position:absolute;height:22px;border-radius:2px;cursor:pointer;transition:opacity .2s,filter .2s;opacity:.75}
+.reign-bar:hover{opacity:1;filter:brightness(1.3)}
+.reign-bar-label{position:absolute;font-family:'Cinzel',serif;font-size:9px;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;top:50%;transform:translateY(-50%);left:5px;pointer-events:none}
+
+/* ── BATTLE MARKERS ── */
+.battle-marker{position:absolute;cursor:pointer;z-index:15}
+.battle-spike{width:2px;background:linear-gradient(180deg,#C04030,transparent);transform-origin:bottom center}
+.battle-diamond{width:9px;height:9px;background:#C04030;transform:rotate(45deg);border:1px solid rgba(255,100,80,.5);transition:all .25s}
+.battle-marker:hover .battle-diamond{transform:rotate(45deg) scale(1.5);background:#E06050}
+
+/* ── PERIOD SPANS ── */
+.period-span{position:absolute;cursor:pointer;transition:opacity .25s}
+.period-span-fill{position:absolute;inset:0;opacity:.12;transition:opacity .25s}
+.period-span:hover .period-span-fill{opacity:.25}
+.period-span-label{position:absolute;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.6);top:4px;left:6px;pointer-events:none;white-space:nowrap}
+.period-span-line{position:absolute;left:0;right:0;height:2px;bottom:0}
+
+/* ── PLAYHEAD ── */
+.playhead{position:absolute;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),rgba(201,168,76,.2));pointer-events:none;z-index:50;transition:left .1s}
+.playhead-cap{position:absolute;top:-4px;left:50%;transform:translateX(-50%);width:10px;height:10px;background:var(--gold);border-radius:50%}
+
+/* ── CURRENT YEAR INDICATOR (top) ── */
+.current-year-top{position:fixed;top:52px;left:50%;transform:translateX(-50%);z-index:195;pointer-events:none}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{position:fixed;right:0;top:52px;bottom:0;width:380px;background:var(--stone-card);border-left:1px solid rgba(201,168,76,.2);transform:translateX(100%);transition:transform .35s cubic-bezier(.22,1,.36,1);z-index:300;display:flex;flex-direction:column;overflow:hidden}
+.detail-panel.open{transform:translateX(0)}
+.detail-close{position:absolute;top:14px;right:14px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(201,168,76,.25);color:var(--gold-dim);font-size:18px;cursor:pointer;transition:all .2s;background:none;z-index:1}
+.detail-close:hover{border-color:var(--gold);color:var(--gold)}
+.detail-header{padding:1.5rem;border-bottom:1px solid rgba(201,168,76,.12);flex-shrink:0}
+.detail-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:.5rem;text-transform:uppercase}
+.detail-name{font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;color:var(--parchment);line-height:1.2;margin-bottom:.3rem}
+.detail-dates{font-family:'EB Garamond',serif;font-style:italic;font-size:14px;color:var(--parchment-dim);opacity:.7}
+.detail-body{flex:1;overflow-y:auto;padding:1.5rem;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
+.detail-body::-webkit-scrollbar{width:4px}
+.detail-body::-webkit-scrollbar-thumb{background:rgba(201,168,76,.2)}
+.detail-section{margin-bottom:1.5rem}
+.detail-section-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(201,168,76,.1)}
+.detail-text{font-size:15px;line-height:1.7;color:var(--parchment-dim)}
+.detail-facts{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.detail-facts li{font-size:14px;color:var(--parchment-dim);padding-left:1.2rem;position:relative;line-height:1.5}
+.detail-facts li::before{content:'◆';position:absolute;left:0;color:var(--gold-dim);font-size:8px;top:.3rem}
+.detail-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.detail-meta-item{background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);padding:.6rem .8rem}
+.detail-meta-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.2rem}
+.detail-meta-value{font-size:13px;color:var(--parchment-dim)}
+.detail-link-btn{display:block;width:100%;padding:.75rem;font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;text-align:center;border:1px solid rgba(201,168,76,.3);color:var(--gold);background:transparent;cursor:pointer;transition:all .2s;margin-top:.75rem;text-decoration:none}
+.detail-link-btn:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
+
+/* ── LEGEND ── */
+.legend{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:1.2rem;background:rgba(13,10,6,.85);border:1px solid rgba(201,168,76,.15);padding:.5rem 1rem;z-index:180;pointer-events:none;backdrop-filter:blur(6px)}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--parchment-dim);opacity:.8}
+.legend-dot{width:9px;height:9px;border-radius:50%}
+.legend-diamond{width:9px;height:9px;transform:rotate(45deg)}
+.legend-bar{width:20px;height:6px;border-radius:1px;opacity:.7}
+
+/* ── GOTO ── */
+.goto-bar{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:.4rem;z-index:180}
+.goto-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:5px 10px;border:1px solid rgba(201,168,76,.2);background:rgba(13,10,6,.85);color:var(--parchment-dim);cursor:pointer;transition:all .2s;white-space:nowrap;backdrop-filter:blur(4px)}
+.goto-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── TOOLTIP ── */
+#tooltip{position:fixed;pointer-events:none;z-index:400;background:rgba(13,10,6,.95);border:1px solid rgba(201,168,76,.3);padding:.5rem .75rem;max-width:220px;transform:translate(-50%,-110%);transition:opacity .15s;opacity:0}
+#tooltip.show{opacity:1}
+#tooltip-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px}
+#tooltip-date{font-family:'EB Garamond',serif;font-size:12px;color:var(--parchment-dim);font-style:italic}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{position:fixed;top:96px;left:0;right:0;height:2px;background:rgba(201,168,76,.08);z-index:185;pointer-events:none}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));transition:width .1s;width:0%}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="nav-back">← Accueil</a>
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <span style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim)">FRISE</span>
+</nav>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <button class="filter-btn active" onclick="toggleFilter('roi',this)">👑 Rois</button>
+  <button class="filter-btn active" onclick="toggleFilter('bataille',this)">⚔ Batailles</button>
+  <button class="filter-btn active" onclick="toggleFilter('evenement',this)">📜 Événements</button>
+  <button class="filter-btn active" onclick="toggleFilter('periode',this)">🗓 Périodes</button>
+  <div class="filter-sep"></div>
+  <div class="dynasty-filter" id="dynastyFilter"></div>
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoom(-1)" title="Dézoomer">−</button>
+    <button class="zoom-btn" onclick="zoom(1)" title="Zoomer">+</button>
+  </div>
+</div>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- MAP PANEL -->
+  <div class="map-panel">
+    <div class="map-inner">
+      <span class="map-era-label" id="mapEraLabel">MÉROVINGIENS</span>
+      <span class="map-year-label" id="mapYearLabel">481</span>
+      <!-- France SVG simplifié -->
+      <svg id="france-map" viewBox="0 0 280 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- Territoire de base France métropolitaine -->
+        <path id="france-base" d="M 80 15 L 115 10 L 155 18 L 185 30 L 210 55 L 225 80 L 228 110 L 220 140 L 240 160 L 245 185 L 230 210 L 210 230 L 185 250 L 160 268 L 140 275 L 115 265 L 95 255 L 70 240 L 50 218 L 35 195 L 30 170 L 38 148 L 28 125 L 32 100 L 45 78 L 55 55 L 65 35 Z" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.5)" stroke-width="1.5"/>
+        <!-- Bretagne -->
+        <path d="M 28 125 L 8 118 L 5 105 L 20 95 L 32 100 Z" fill="rgba(201,168,76,0.08)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+        <!-- Corsica -->
+        <ellipse cx="255" cy="232" rx="10" ry="16" fill="rgba(201,168,76,0.08)" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+        <!-- Paris marker -->
+        <circle id="paris-dot" cx="138" cy="105" r="4" fill="var(--gold)" opacity="0.8"/>
+        <text x="144" y="109" font-size="8" fill="rgba(201,168,76,0.7)" font-family="serif">Paris</text>
+        <!-- Territory overlay (changes per dynasty) -->
+        <path id="territory-overlay" d="" fill="rgba(201,168,76,0.15)" opacity="0" style="transition:all .8s"/>
+        <!-- Battle dots on map -->
+        <g id="map-battles"></g>
+      </svg>
+      <span class="map-dynasty-label" id="mapDynastyLabel">Règne de Clovis Ier</span>
+    </div>
+  </div>
+
+  <!-- SCROLL WRAP -->
+  <div class="scroll-wrap" id="scrollWrap">
+    <div class="timeline-inner" id="timelineInner">
+
+      <!-- Dynasty bands -->
+      <div class="dynasty-bands" id="dynastyBands"></div>
+
+      <!-- Ruler -->
+      <div class="ruler" id="ruler"></div>
+
+      <!-- Playhead -->
+      <div class="playhead" id="playhead">
+        <div class="playhead-cap"></div>
+      </div>
+
+      <!-- Axis line -->
+      <div class="axis-line" id="axisLine" style="top:calc(var(--band-h) + var(--ruler-h) + 70px)"></div>
+
+      <!-- Content rows -->
+      <div id="reignBars" style="position:absolute;left:0;top:calc(var(--band-h) + var(--ruler-h) + 10px)"></div>
+      <div id="periodSpans" style="position:absolute;left:0;top:calc(var(--band-h) + var(--ruler-h) + 45px)"></div>
+      <div id="battleMarkers" style="position:absolute;left:0;top:calc(var(--band-h) + var(--ruler-h) + 95px)"></div>
+      <div id="eventMarkers" style="position:absolute;left:0;top:calc(var(--band-h) + var(--ruler-h) + 130px)"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-bar" style="background:var(--gold)"></div> Règnes</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div> Rois / Chefs</div>
+  <div class="legend-item"><div class="legend-diamond" style="background:#C04030"></div> Batailles</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4A7AB5"></div> Événements</div>
+  <div class="legend-item"><div class="legend-bar" style="background:#3A8A5A;height:8px"></div> Périodes</div>
+</div>
+
+<!-- GOTO SHORTCUTS -->
+<div class="goto-bar">
+  <button class="goto-btn" onclick="gotoYear(481)">481 Clovis</button>
+  <button class="goto-btn" onclick="gotoYear(800)">800 Charlemagne</button>
+  <button class="goto-btn" onclick="gotoYear(1429)">1429 Jeanne d'Arc</button>
+  <button class="goto-btn" onclick="gotoYear(1515)">1515 Marignan</button>
+  <button class="goto-btn" onclick="gotoYear(1789)">1789 Révolution</button>
+  <button class="goto-btn" onclick="gotoYear(1815)">1815 Waterloo</button>
+  <button class="goto-btn" onclick="gotoYear(1944)">1944 Libération</button>
+</div>
+
+<!-- TOOLTIP -->
+<div id="tooltip"><div id="tooltip-name"></div><div id="tooltip-date"></div></div>
+
+<!-- DETAIL PANEL -->
+<div class="detail-panel" id="detailPanel">
+  <button class="detail-close" onclick="closeDetail()">×</button>
+  <div class="detail-header">
+    <div class="detail-type" id="detail-type"></div>
+    <div class="detail-name" id="detail-name"></div>
+    <div class="detail-dates" id="detail-dates"></div>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+// ── STATE ──
+let pxPerYear = 3.2;
+const START_YEAR = 481;
+const END_YEAR   = 1969;
+const TOTAL_YEARS = END_YEAR - START_YEAR;
+let activeFilters = {roi:true, bataille:true, evenement:true, periode:true};
+let activeDynasties = new Set(HISTORIA.dynasties.map(d=>d.id));
+let currentYear = 481;
+let isDragging = false, dragStartX = 0, dragScrollLeft = 0;
+
+// ── HELPERS ──
+function yearToX(y){ return (y - START_YEAR) * pxPerYear; }
+function xToYear(x){ return Math.round(x / pxPerYear + START_YEAR); }
+function totalWidth(){ return TOTAL_YEARS * pxPerYear; }
+
+// ── INIT TIMELINE WIDTH ──
+function setTimelineWidth(){
+  const tw = totalWidth();
+  document.getElementById('timelineInner').style.width = tw + 'px';
+  document.getElementById('dynastyBands').style.width = tw + 'px';
+  document.getElementById('ruler').style.width = tw + 'px';
+  document.getElementById('axisLine').style.width = tw + 'px';
+  document.getElementById('reignBars').style.width = tw + 'px';
+  document.getElementById('periodSpans').style.width = tw + 'px';
+  document.getElementById('battleMarkers').style.width = tw + 'px';
+  document.getElementById('eventMarkers').style.width = tw + 'px';
+}
+
+// ── DYNASTY BANDS ──
+function buildDynastyBands(){
+  const el = document.getElementById('dynastyBands');
+  el.innerHTML = '';
+  HISTORIA.dynasties.forEach(d => {
+    const finY = d.fin === 9999 ? END_YEAR : d.fin;
+    const w = (finY - d.debut) * pxPerYear;
+    const x = yearToX(d.debut);
+    const band = document.createElement('div');
+    band.className = 'dynasty-band';
+    band.style.cssText = `position:absolute;left:${x}px;width:${w}px;background:${d.couleur}22;border-right:1px solid ${d.couleur}44`;
+    band.dataset.dynastyId = d.id;
+    if(w > 60){
+      const lbl = document.createElement('span');
+      lbl.className = 'dynasty-band-label';
+      lbl.textContent = d.nom.toUpperCase();
+      band.appendChild(lbl);
+    }
+    band.addEventListener('click', ()=>showDynastyDetail(d));
+    el.appendChild(band);
+  });
+}
+
+// ── DYNASTY FILTER DOTS ──
+function buildDynastyFilter(){
+  const el = document.getElementById('dynastyFilter');
+  el.innerHTML = '';
+  const lbl = document.createElement('span');
+  lbl.style.cssText='font-family:Cinzel,serif;font-size:9px;letter-spacing:2px;color:var(--parchment-dim);opacity:.6;white-space:nowrap';
+  lbl.textContent='DYNASTIES :';
+  el.appendChild(lbl);
+  HISTORIA.dynasties.forEach(d => {
+    const dot = document.createElement('div');
+    dot.className = 'dyn-dot active';
+    dot.style.cssText = `background:${d.couleur};`;
+    dot.title = d.nom;
+    dot.dataset.id = d.id;
+    dot.addEventListener('click', ()=>{
+      const isActive = activeDynasties.has(d.id);
+      if(isActive) activeDynasties.delete(d.id); else activeDynasties.add(d.id);
+      dot.classList.toggle('active', !isActive ? true : false);
+      renderReignBars();
+    });
+    el.appendChild(dot);
+  });
+}
+
+// ── RULER ──
+function buildRuler(){
+  const el = document.getElementById('ruler');
+  el.innerHTML = '';
+  const step = pxPerYear < 2 ? 50 : pxPerYear < 4 ? 25 : pxPerYear < 8 ? 10 : 5;
+  const firstTick = Math.ceil(START_YEAR / step) * step;
+  for(let y = firstTick; y <= END_YEAR; y += step){
+    const x = yearToX(y);
+    const tick = document.createElement('div');
+    tick.className = 'ruler-tick';
+    tick.style.cssText = `left:${x}px`;
+    const isMajor = y % 100 === 0;
+    const h = isMajor ? 16 : (y % 50 === 0 ? 10 : 6);
+    tick.innerHTML = `<span class="ruler-tick-label" style="opacity:${isMajor?1:0.5}">${isMajor||step<=25?y:''}</span><div class="ruler-tick-line ${isMajor?'major':''}" style="height:${h}px"></div>`;
+    el.appendChild(tick);
+  }
+}
+
+// ── REIGN BARS ──
+function renderReignBars(){
+  const el = document.getElementById('reignBars');
+  el.innerHTML = '';
+  if(!activeFilters.roi) return;
+  const lanes = [];
+  HISTORIA.rois.forEach(r => {
+    if(!activeDynasties.has(r.dynastie)) return;
+    const x = yearToX(r.debut_regne);
+    const fin = r.fin_regne || END_YEAR;
+    const w = Math.max((fin - r.debut_regne) * pxPerYear, 8);
+    const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+    const col = dyn ? dyn.couleur : '#888';
+    // Find a lane with no overlap
+    let lane = 0;
+    while(lanes[lane] && lanes[lane] > x + 2) lane++;
+    lanes[lane] = x + w;
+
+    const bar = document.createElement('div');
+    bar.className = 'reign-bar';
+    bar.style.cssText = `left:${x}px;width:${w}px;background:${col};top:${lane*26}px;min-width:4px`;
+    if(w > 30){
+      bar.innerHTML = `<span class="reign-bar-label">${r.nom}</span>`;
+    }
+    bar.addEventListener('mouseenter', e => showTooltip(e, r.nom, `${r.debut_regne}–${r.fin_regne||'?'}`));
+    bar.addEventListener('mouseleave', hideTooltip);
+    bar.addEventListener('click', ()=>showRoiDetail(r));
+    el.appendChild(bar);
+
+    // Also add a crown dot at start
+    if(activeFilters.roi){
+      const dot = document.createElement('div');
+      dot.className = 'event-dot type-roi';
+      dot.style.cssText = `left:${x-5}px;top:${lane*26+6}px`;
+      dot.innerHTML = `<div class="dot-inner"></div><span class="event-label" style="top:-18px;left:0">${r.nom}</span>`;
+      dot.addEventListener('mouseenter', e => showTooltip(e, r.nom, `Règne : ${r.debut_regne}–${r.fin_regne||'?'}`));
+      dot.addEventListener('mouseleave', hideTooltip);
+      dot.addEventListener('click', ()=>showRoiDetail(r));
+      el.appendChild(dot);
+    }
+  });
+  // Adjust container height
+  el.style.height = (lanes.length * 26 + 30) + 'px';
+}
+
+// ── PERIOD SPANS ──
+function renderPeriodSpans(){
+  const el = document.getElementById('periodSpans');
+  el.innerHTML = '';
+  if(!activeFilters.periode) return;
+  HISTORIA.periodes.forEach(p => {
+    const x = yearToX(p.debut);
+    const w = (p.fin - p.debut) * pxPerYear;
+    const span = document.createElement('div');
+    span.className = 'period-span';
+    span.style.cssText = `left:${x}px;width:${w}px;height:30px`;
+    span.innerHTML = `
+      <div class="period-span-fill" style="background:${p.couleur}"></div>
+      <span class="period-span-label">${p.titre.toUpperCase()}</span>
+      <div class="period-span-line" style="background:${p.couleur}"></div>`;
+    span.addEventListener('click', ()=>showPeriodeDetail(p));
+    span.addEventListener('mouseenter', e => showTooltip(e, p.titre, `${p.debut}–${p.fin}`));
+    span.addEventListener('mouseleave', hideTooltip);
+    el.appendChild(span);
+  });
+}
+
+// ── BATTLE MARKERS ──
+function renderBattleMarkers(){
+  const el = document.getElementById('battleMarkers');
+  el.innerHTML = '';
+  if(!activeFilters.bataille) return;
+  HISTORIA.batailles.forEach(b => {
+    const x = yearToX(b.date);
+    const h = 20 + b.importance * 8;
+    const marker = document.createElement('div');
+    marker.className = 'battle-marker';
+    marker.style.cssText = `left:${x}px;height:${h}px;width:12px`;
+    marker.innerHTML = `
+      <div class="battle-diamond" style="position:absolute;top:0;left:1px"></div>
+      <div class="battle-spike" style="position:absolute;top:9px;left:5px;height:${h-9}px"></div>`;
+    marker.addEventListener('mouseenter', e => showTooltip(e, b.nom, `${b.date} — ${b.lieu}`));
+    marker.addEventListener('mouseleave', hideTooltip);
+    marker.addEventListener('click', ()=>showBatailleDetail(b));
+    el.appendChild(marker);
+  });
+}
+
+// ── EVENT MARKERS ──
+function renderEventMarkers(){
+  const el = document.getElementById('eventMarkers');
+  el.innerHTML = '';
+  if(!activeFilters.evenement) return;
+  const typeColor = {religion:'#7A4A9A',politique:'#4A7AB5',culture:'#4A9A7A',catastrophe:'#9A4A4A',droit:'#9A7A4A',social:'#6A9A4A'};
+  HISTORIA.evenements.forEach(ev => {
+    const x = yearToX(ev.date);
+    const dot = document.createElement('div');
+    dot.className = 'event-dot type-evenement';
+    dot.style.cssText = `left:${x}px;top:0`;
+    const col = typeColor[ev.type] || '#4A7AB5';
+    dot.innerHTML = `<div class="dot-inner" style="background:${col}"></div><span class="event-label" style="top:-18px;left:-40px">${ev.titre}</span>`;
+    dot.addEventListener('mouseenter', e => showTooltip(e, ev.titre, ev.date));
+    dot.addEventListener('mouseleave', hideTooltip);
+    dot.addEventListener('click', ()=>showEvenementDetail(ev));
+    el.appendChild(dot);
+  });
+}
+
+// ── RENDER ALL ──
+function renderAll(){
+  setTimelineWidth();
+  buildDynastyBands();
+  buildRuler();
+  renderReignBars();
+  renderPeriodSpans();
+  renderBattleMarkers();
+  renderEventMarkers();
+}
+
+// ── FILTERS ──
+function toggleFilter(type, btn){
+  activeFilters[type] = !activeFilters[type];
+  btn.classList.toggle('active', activeFilters[type]);
+  if(type==='roi') renderReignBars();
+  if(type==='bataille') renderBattleMarkers();
+  if(type==='evenement') renderEventMarkers();
+  if(type==='periode') renderPeriodSpans();
+}
+
+// ── ZOOM ──
+function zoom(dir){
+  pxPerYear = Math.max(1, Math.min(20, pxPerYear + dir * 1.2));
+  const centerYear = currentYear;
+  renderAll();
+  gotoYear(centerYear);
+}
+
+// ── SCROLL TRACKING ──
+function onScroll(){
+  const sw = document.getElementById('scrollWrap');
+  const scrollX = sw.scrollLeft;
+  const tw = totalWidth();
+  const progress = scrollX / (tw - sw.clientWidth);
+  document.getElementById('progressFill').style.width = (progress * 100) + '%';
+  const midX = scrollX + sw.clientWidth / 2;
+  currentYear = Math.round(xToYear(midX));
+  currentYear = Math.max(START_YEAR, Math.min(END_YEAR, currentYear));
+  updatePlayhead(midX);
+  updateMapPanel(currentYear);
+}
+
+function updatePlayhead(x){
+  const sw = document.getElementById('scrollWrap');
+  document.getElementById('playhead').style.left = x + 'px';
+}
+
+// ── MAP UPDATES ──
+const dynastyTerritoryPaths = {
+  merovingiens: 'M 80 50 L 200 40 L 230 90 L 220 140 L 180 155 L 100 150 L 60 120 L 65 75 Z',
+  carolingiens: 'M 60 15 L 230 12 L 258 80 L 250 160 L 210 230 L 140 270 L 70 240 L 32 170 L 28 90 Z',
+  capetiens:    'M 115 70 L 175 65 L 185 110 L 170 145 L 120 148 L 100 120 Z',
+  valois:       'M 80 15 L 220 10 L 240 80 L 235 175 L 185 250 L 115 265 L 55 218 L 35 148 L 45 65 Z',
+  bourbons:     'M 65 12 L 225 8 L 245 85 L 240 185 L 185 252 L 100 260 L 42 210 L 28 130 L 40 55 Z',
+  empire1:      'M 55 10 L 240 5 L 258 90 L 252 195 L 200 258 L 100 268 L 32 220 L 22 125 L 38 48 Z',
+  republique5:  'M 65 12 L 225 8 L 245 85 L 240 185 L 185 252 L 100 260 L 42 210 L 28 130 L 40 55 Z',
+};
+
+function updateMapPanel(year){
+  document.getElementById('mapYearLabel').textContent = year;
+  const dyn = HISTORIA.utils.getDynastieParAnnee(year);
+  if(dyn){
+    document.getElementById('mapEraLabel').textContent = dyn.nom.toUpperCase();
+    const overlay = document.getElementById('territory-overlay');
+    const path = dynastyTerritoryPaths[dyn.id] || dynastyTerritoryPaths.bourbons;
+    overlay.setAttribute('d', path);
+    overlay.setAttribute('fill', dyn.couleur + '33');
+    overlay.setAttribute('stroke', dyn.couleur + '88');
+    overlay.setAttribute('stroke-width','1.5');
+    overlay.setAttribute('opacity','1');
+  }
+  // Update current ruler display
+  const rois = HISTORIA.utils.getRoisParAnnee(year);
+  if(rois.length > 0){
+    const r = rois[0];
+    document.getElementById('mapDynastyLabel').textContent = `Règne de ${r.nom}`;
+  }
+}
+
+// ── GOTO ──
+function gotoYear(year){
+  const sw = document.getElementById('scrollWrap');
+  const targetX = yearToX(year) - sw.clientWidth/2;
+  sw.scrollTo({left: Math.max(0, targetX), behavior:'smooth'});
+}
+
+// ── DRAG SCROLL ──
+function initDragScroll(){
+  const sw = document.getElementById('scrollWrap');
+  sw.addEventListener('mousedown', e=>{
+    if(e.button !== 0) return;
+    isDragging = true;
+    dragStartX = e.pageX - sw.offsetLeft;
+    dragScrollLeft = sw.scrollLeft;
+    sw.style.cursor = 'grabbing';
+  });
+  document.addEventListener('mouseup', ()=>{ isDragging=false; document.getElementById('scrollWrap').style.cursor='grab'; });
+  sw.addEventListener('mousemove', e=>{
+    if(!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - sw.offsetLeft;
+    sw.scrollLeft = dragScrollLeft - (x - dragStartX) * 1.1;
+  });
+  sw.addEventListener('scroll', onScroll);
+  sw.addEventListener('wheel', e=>{ if(e.ctrlKey){ e.preventDefault(); zoom(e.deltaY < 0 ? 1 : -1); } }, {passive:false});
+}
+
+// ── TOOLTIP ──
+function showTooltip(e, name, date){
+  const tt = document.getElementById('tooltip');
+  document.getElementById('tooltip-name').textContent = name;
+  document.getElementById('tooltip-date').textContent = date;
+  tt.style.left = e.clientX + 'px';
+  tt.style.top = (e.clientY - 8) + 'px';
+  tt.classList.add('show');
+}
+function hideTooltip(){
+  document.getElementById('tooltip').classList.remove('show');
+}
+
+// ── DETAIL PANEL ──
+function openDetail(){
+  document.getElementById('detailPanel').classList.add('open');
+}
+function closeDetail(){
+  document.getElementById('detailPanel').classList.remove('open');
+}
+function setDetail(type, name, dates, body){
+  document.getElementById('detail-type').textContent = type;
+  document.getElementById('detail-name').textContent = name;
+  document.getElementById('detail-dates').textContent = dates;
+  document.getElementById('detail-body').innerHTML = body;
+  openDetail();
+}
+
+function showRoiDetail(r){
+  const dyn = HISTORIA.dynasties.find(d=>d.id===r.dynastie);
+  const faits = r.faits ? r.faits.map(f=>`<li>${f}</li>`).join('') : '';
+  const meta = `
+    <div class="detail-meta-grid">
+      <div class="detail-meta-item"><span class="detail-meta-label">Naissance</span><span class="detail-meta-value">${r.naissance||'?'} — ${r.lieu_naissance||'?'}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Mort</span><span class="detail-meta-value">${r.mort||'?'} — ${r.lieu_mort||'?'}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Règne</span><span class="detail-meta-value">${r.debut_regne} – ${r.fin_regne||'?'}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Épouse</span><span class="detail-meta-value">${r.epouse||'?'}</span></div>
+      ${dyn?`<div class="detail-meta-item" style="grid-column:span 2"><span class="detail-meta-label">Dynastie</span><span class="detail-meta-value">${dyn.nom}</span></div>`:''}
+    </div>`;
+  const body = `
+    ${meta}
+    <div class="detail-section" style="margin-top:1rem">
+      <div class="detail-section-title">BIOGRAPHIE</div>
+      <p class="detail-text">${r.resume}</p>
+    </div>
+    ${faits?`<div class="detail-section"><div class="detail-section-title">FAITS MARQUANTS</div><ul class="detail-facts">${faits}</ul></div>`:''}
+    <a href="roi.html?id=${r.id}" class="detail-link-btn">Fiche complète →</a>`;
+  setDetail(r.surnom ? r.surnom.toUpperCase() : 'ROI DE FRANCE', r.nom, `${r.debut_regne} – ${r.fin_regne||''}`, body);
+}
+
+function showBatailleDetail(b){
+  const stars = '★'.repeat(b.importance) + '☆'.repeat(5-b.importance);
+  const body = `
+    <div class="detail-meta-grid">
+      <div class="detail-meta-item"><span class="detail-meta-label">Date</span><span class="detail-meta-value">${b.date}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Importance</span><span class="detail-meta-value" style="color:var(--gold)">${stars}</span></div>
+      <div class="detail-meta-item" style="grid-column:span 2"><span class="detail-meta-label">Lieu</span><span class="detail-meta-value">${b.lieu}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Vainqueur</span><span class="detail-meta-value">${b.vainqueur}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Perdant</span><span class="detail-meta-value">${b.perdant}</span></div>
+    </div>
+    <div class="detail-section" style="margin-top:1rem">
+      <div class="detail-section-title">RÉCIT</div>
+      <p class="detail-text">${b.description}</p>
+    </div>`;
+  setDetail('BATAILLE', b.nom, b.date, body);
+}
+
+function showPeriodeDetail(p){
+  const chaps = (p.chapitres||[]).map(c=>`
+    <div style="margin-bottom:1rem;padding-left:.8rem;border-left:2px solid ${p.couleur}44">
+      <div style="font-family:Cinzel,serif;font-size:10px;color:var(--gold-dim);letter-spacing:2px;margin-bottom:.3rem">${c.annee}</div>
+      <div style="font-weight:500;color:var(--parchment);font-size:14px;margin-bottom:.3rem">${c.titre}</div>
+      <p class="detail-text">${c.texte}</p>
+    </div>`).join('');
+  const bels = (p.belligerants||[]).length > 0 ?
+    `<div class="detail-section"><div class="detail-section-title">BELLIGÉRANTS</div><p class="detail-text">${p.belligerants.join(' · ')}</p></div>` : '';
+  const body = `
+    <div class="detail-section">
+      <div class="detail-section-title">RÉSUMÉ</div>
+      <p class="detail-text">${p.resume}</p>
+    </div>
+    ${bels}
+    <div class="detail-section"><div class="detail-section-title">CHRONOLOGIE</div>${chaps}</div>
+    <a href="periode.html?id=${p.id}" class="detail-link-btn">Page complète →</a>`;
+  setDetail(p.type.toUpperCase(), p.titre, `${p.debut} – ${p.fin}`, body);
+}
+
+function showEvenementDetail(ev){
+  const typeLabel = {religion:'Religion',politique:'Politique',culture:'Culture',catastrophe:'Catastrophe',droit:'Droit',social:'Société'};
+  const body = `
+    <div class="detail-meta-grid">
+      <div class="detail-meta-item"><span class="detail-meta-label">Date</span><span class="detail-meta-value">${ev.date}</span></div>
+      <div class="detail-meta-item"><span class="detail-meta-label">Type</span><span class="detail-meta-value">${typeLabel[ev.type]||ev.type}</span></div>
+    </div>
+    <div class="detail-section" style="margin-top:1rem">
+      <div class="detail-section-title">DESCRIPTION</div>
+      <p class="detail-text">${ev.description}</p>
+    </div>`;
+  setDetail('ÉVÉNEMENT', ev.titre, ev.date, body);
+}
+
+function showDynastyDetail(d){
+  const rois = HISTORIA.utils.getRoisByDynastie(d.id);
+  const roiList = rois.map(r=>`<li style="cursor:pointer;color:var(--gold-dim)" onclick="showRoiDetail(HISTORIA.utils.getRoiById('${r.id}'))">${r.nom} (${r.debut_regne}–${r.fin_regne||'?'})</li>`).join('');
+  const body = `
+    <div class="detail-section">
+      <div class="detail-section-title">PRÉSENTATION</div>
+      <p class="detail-text">${d.description}</p>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">DURÉE</div>
+      <p class="detail-text">${d.debut} – ${d.fin===9999?'présent':d.fin} (${(d.fin===9999?END_YEAR:d.fin)-d.debut} ans)</p>
+    </div>
+    <div class="detail-section">
+      <div class="detail-section-title">SOUVERAINS</div>
+      <ul class="detail-facts">${roiList}</ul>
+    </div>`;
+  setDetail('DYNASTIE', d.nom, `${d.debut} – ${d.fin===9999?'présent':d.fin}`, body);
+}
+
+// ── KEYBOARD NAV ──
+document.addEventListener('keydown', e=>{
+  const sw = document.getElementById('scrollWrap');
+  if(e.key==='ArrowRight') sw.scrollLeft += 80;
+  if(e.key==='ArrowLeft')  sw.scrollLeft -= 80;
+  if(e.key==='Escape') closeDetail();
+  if(e.key==='+' || e.key==='=') zoom(1);
+  if(e.key==='-') zoom(-1);
+});
+
+// ── BOOT ──
+document.addEventListener('DOMContentLoaded', ()=>{
+  buildDynastyFilter();
+  renderAll();
+  initDragScroll();
+  updateMapPanel(START_YEAR);
+  // Start at 481
+  setTimeout(()=>{ gotoYear(600); }, 200);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Période — Historia Franciae</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700;900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-dim:#7A6230;
+  --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
+  --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+  --period-color:#8B1A1A; /* overridden per period */
+}
+html{scroll-behavior:smooth}
+body{background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif;padding-top:52px}
+
+/* NAV */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(13,10,6,.97);border-bottom:1px solid rgba(201,168,76,.18)}
+.nav-logo{font-family:'Cinzel',serif;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none;letter-spacing:2px}
+.nav-links{display:flex;gap:1.5rem}
+.nav-link{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--parchment-dim);text-decoration:none;opacity:.7;transition:opacity .2s}
+.nav-link:hover{opacity:1;color:var(--gold)}
+
+/* HERO */
+.period-hero{min-height:60vh;display:flex;align-items:flex-end;padding:4rem 2rem 3rem;position:relative;overflow:hidden;background:var(--stone-mid)}
+.period-hero-bg{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,rgba(13,10,6,.9) 100%)}
+.period-hero-accent{position:absolute;inset:0;opacity:.06}
+.period-hero-inner{position:relative;z-index:2;max-width:900px}
+.period-type-badge{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;padding:4px 14px;border:1px solid;margin-bottom:1.2rem;display:inline-block}
+.period-title{font-family:'Cinzel',serif;font-size:clamp(2.2rem,6vw,4.5rem);font-weight:900;line-height:.95;margin-bottom:.75rem}
+.period-dates{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:.15em;margin-bottom:1.2rem;opacity:.6}
+.period-resume{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.2rem;line-height:1.6;color:var(--parchment-dim);max-width:640px}
+
+/* BELLIGERENTS BAR */
+.belligerants-bar{background:var(--stone-light);border-top:1px solid rgba(201,168,76,.08);border-bottom:1px solid rgba(201,168,76,.08);padding:.8rem 2rem;display:flex;align-items:center;gap:1.5rem;overflow-x:auto;scrollbar-width:none}
+.belligerants-bar::-webkit-scrollbar{display:none}
+.bel-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);flex-shrink:0}
+.bel-chip{font-family:'EB Garamond',serif;font-size:13px;color:var(--parchment-dim);padding:.3rem .75rem;border:1px solid rgba(201,168,76,.15);flex-shrink:0}
+.bel-vs{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);opacity:.5}
+
+/* MAIN LAYOUT */
+.period-body{max-width:1200px;margin:0 auto;padding:3rem 2rem;display:grid;grid-template-columns:1fr 360px;gap:2.5rem;align-items:start}
+@media(max-width:900px){.period-body{grid-template-columns:1fr}}
+
+/* CHAPTERS */
+.chapters{}
+.chapter{margin-bottom:3rem;padding-bottom:3rem;border-bottom:1px solid rgba(201,168,76,.08);position:relative}
+.chapter:last-child{border-bottom:none}
+.chapter-num{font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:.4rem}
+.chapter-year{font-family:'Cinzel',serif;font-size:2.5rem;font-weight:900;color:var(--period-color);opacity:.3;position:absolute;right:0;top:0;line-height:1}
+.chapter-title{font-family:'Cinzel',serif;font-size:1.15rem;font-weight:700;color:var(--parchment);margin-bottom:1rem;max-width:75%}
+.chapter-text{font-size:1rem;line-height:1.85;color:var(--parchment-dim)}
+.chapter-map{margin-top:1.25rem;background:var(--stone-card);border:1px solid rgba(201,168,76,.1);height:200px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;cursor:pointer}
+.chapter-map-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.chapter-map-label{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--gold-dim);white-space:nowrap}
+.chapter-map-link{position:absolute;top:8px;right:8px;font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);background:rgba(13,10,6,.8);padding:3px 8px;border:1px solid rgba(201,168,76,.15);text-decoration:none;transition:all .2s}
+.chapter-map-link:hover{border-color:rgba(201,168,76,.4);color:var(--gold)}
+
+/* CHAPTER TIMELINE (vertical) */
+.chapter-timeline{position:relative;margin:1.5rem 0 .5rem}
+.ct-line{position:absolute;left:16px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--period-color),transparent);opacity:.3}
+.ct-event{display:flex;align-items:flex-start;gap:1rem;margin-bottom:.75rem;position:relative}
+.ct-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:.25rem;border:2px solid}
+.ct-content{}
+.ct-year{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim)}
+.ct-text{font-size:14px;color:var(--parchment-dim);line-height:1.5}
+
+/* SIDEBAR */
+.period-sidebar{}
+.sidebar-sticky{position:sticky;top:72px}
+
+.sidebar-card{background:var(--stone-card);border:1px solid rgba(201,168,76,.1);padding:1.25rem;margin-bottom:1rem}
+.sc-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin-bottom:.75rem;padding-bottom:.4rem;border-bottom:1px solid rgba(201,168,76,.08)}
+.sc-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.35rem 0;border-bottom:1px solid rgba(201,168,76,.05);gap:.75rem}
+.sc-row:last-child{border-bottom:none}
+.sc-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--gold-dim);flex-shrink:0}
+.sc-value{font-size:13px;color:var(--parchment-dim);text-align:right;line-height:1.4}
+
+/* PERSONNAGES CARDS */
+.perso-grid{display:flex;flex-direction:column;gap:.5rem}
+.perso-card{display:flex;align-items:center;gap:.75rem;padding:.6rem .8rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.08);cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
+.perso-card:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.08)}
+.perso-emoji{font-size:1.3rem;flex-shrink:0}
+.perso-name{font-family:'Cinzel',serif;font-size:10px;color:var(--parchment);display:block;margin-bottom:1px}
+.perso-role{font-size:11px;color:var(--parchment-dim);opacity:.6}
+
+/* BATTLES SIDEBAR */
+.battle-mini{padding:.55rem .7rem;margin-bottom:.4rem;border-left:2px solid;cursor:pointer;transition:all .2s}
+.battle-mini:hover{background:rgba(201,168,76,.05)}
+.battle-mini-name{font-family:'Cinzel',serif;font-size:10px;color:var(--parchment)}
+.battle-mini-meta{font-size:11px;color:var(--parchment-dim);opacity:.6;margin-top:1px}
+
+/* MINI MAP SVG */
+.mini-map-svg{width:100%;height:180px}
+
+/* PERIOD NAVIGATION */
+.period-nav{background:var(--stone-light);border-top:1px solid rgba(201,168,76,.08);padding:2rem}
+.period-nav-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.pnav-card{padding:1rem 1.25rem;background:var(--stone-card);border:1px solid rgba(201,168,76,.1);cursor:pointer;text-decoration:none;color:inherit;transition:all .2s;display:block}
+.pnav-card:hover{border-color:rgba(201,168,76,.3)}
+.pnav-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;color:var(--gold-dim);display:block;margin-bottom:.3rem}
+.pnav-title{font-family:'Cinzel',serif;font-size:13px;color:var(--parchment);line-height:1.3}
+.pnav-dates{font-size:12px;color:var(--parchment-dim);opacity:.5;margin-top:.2rem}
+.pnav-card.next{text-align:right}
+
+/* BACK NAV */
+.back-nav{max-width:1200px;margin:0 auto;padding:2rem;display:flex;gap:.75rem;flex-wrap:wrap;border-top:1px solid rgba(201,168,76,.06)}
+.bnav-link{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;padding:7px 14px;border:1px solid rgba(201,168,76,.15);color:var(--gold-dim);text-decoration:none;transition:all .2s}
+.bnav-link:hover{border-color:var(--gold);color:var(--gold)}
+
+/* TYPE COLORS */
+.type-conflit .period-type-badge{border-color:rgba(139,26,26,.5);color:#C04030}
+.type-apogee .period-type-badge{border-color:rgba(74,122,181,.5);color:#6A9ABF}
+.type-rupture .period-type-badge{border-color:rgba(58,138,90,.5);color:#5ABF8A}
+
+/* CHAPTER NUMBER DECORATION */
+.chapter::before{content:attr(data-num);position:absolute;right:0;top:-10px;font-family:'Cinzel',serif;font-size:5rem;font-weight:900;color:rgba(201,168,76,.04);line-height:1;pointer-events:none}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="index.html" class="nav-logo">⚜ HISTORIA FRANCIAE</a>
+  <div class="nav-links">
+    <a href="frise.html" class="nav-link">Frise</a>
+    <a href="cartes.html" class="nav-link">Cartes</a>
+    <a href="personnages.html" class="nav-link">Personnages</a>
+  </div>
+</nav>
+
+<div id="page-root">
+  <div style="text-align:center;padding:6rem 2rem;font-family:Cinzel,serif;color:var(--gold-dim)">Chargement…</div>
+</div>
+
+<script src="data.js"></script>
+<script>
+function getParam(k){ return new URLSearchParams(window.location.search).get(k); }
+
+// Mini France SVG for chapters
+function miniMapSVG(periodeId, chapAnnee){
+  const periodeColors = {
+    guerre_cent_ans:'#8B1A1A', empire_carolingien:'#4A6741',
+    guerres_religion:'#7A3A5A', guerre_trente_ans:'#3A5A6B',
+    revolution:'#3A6B5A', guerres_napoleon:'#5A3A6B'
+  };
+  const col = periodeColors[periodeId] || '#C9A84C';
+  return `<svg class="mini-map-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+    <rect width="280" height="200" fill="#0A0E14"/>
+    <path d="M 72 20 L 130 14 L 175 22 L 200 38 L 210 65 L 205 95 L 218 118 L 215 142 L 198 165 L 175 182 L 150 192 L 122 185 L 96 172 L 72 152 L 55 128 L 48 105 L 55 80 L 44 58 L 52 40 Z"
+      fill="${col}18" stroke="${col}66" stroke-width="1.2"/>
+    <path d="M 44 58 L 22 52 L 12 62 L 18 78 L 36 84 L 48 78 Z" fill="${col}12" stroke="${col}44" stroke-width="0.8"/>
+    <circle cx="132" cy="82" r="3" fill="${col}" opacity="0.7"/>
+    <text x="140" y="86" font-family="serif" font-size="7" fill="${col}99">Paris</text>
+    <text x="14" y="14" font-family="'Cinzel',serif" font-size="7" fill="${col}66" letter-spacing="2">${chapAnnee}</text>
+  </svg>`;
+}
+
+function typeLabel(type){
+  const map={conflit:'CONFLIT MAJEUR',apogee:'APOGÉE',rupture:'RUPTURE HISTORIQUE'};
+  return map[type]||type.toUpperCase();
+}
+
+function renderPeriodePage(p){
+  if(!p){
+    document.getElementById('page-root').innerHTML=`<div style="text-align:center;padding:6rem 2rem">
+      <h2 style="font-family:Cinzel,serif;color:var(--gold-dim);margin-bottom:1rem">Période introuvable</h2>
+      <a href="index.html" style="color:var(--parchment-dim)">← Retour à l'accueil</a></div>`;
+    return;
+  }
+
+  document.title = `${p.titre} — Historia Franciae`;
+  document.documentElement.style.setProperty('--period-color', p.couleur);
+
+  // Adjacent periods
+  const allP = HISTORIA.periodes;
+  const idx = allP.findIndex(pp=>pp.id===p.id);
+  const prev = idx>0 ? allP[idx-1] : null;
+  const next = idx<allP.length-1 ? allP[idx+1] : null;
+
+  // Characters
+  const roisCles = (p.personnages_cles||[]).map(id=>HISTORIA.rois.find(r=>r.id===id)).filter(Boolean);
+  const persoSec = (p.personnages_secondaires||[]).map(id=>HISTORIA.personnages.find(pp=>pp.id===id)).filter(Boolean);
+
+  // Battles
+  const batailles = HISTORIA.batailles.filter(b=>b.date>=p.debut&&b.date<=p.fin);
+
+  // Build chapters HTML
+  const chaptersHTML = (p.chapitres||[]).map((c,i)=>`
+    <div class="chapter" data-num="${i+1}">
+      <div class="chapter-year">${c.annee}</div>
+      <div class="chapter-num">CHAPITRE ${i+1}</div>
+      <h2 class="chapter-title">${c.titre}</h2>
+      <p class="chapter-text">${c.texte}</p>
+      <div class="chapter-map" onclick="window.location='cartes.html'">
+        <div class="chapter-map-inner">${miniMapSVG(p.id, c.annee)}</div>
+        <span class="chapter-map-label">CARTE — ${c.annee}</span>
+        <a class="chapter-map-link" href="cartes.html">Carte interactive →</a>
+      </div>
+    </div>`).join('');
+
+  // Belligerents
+  const belsHTML = (p.belligerants||[]).length ? `
+    <div class="belligerants-bar">
+      <span class="bel-label">BELLIGÉRANTS :</span>
+      ${p.belligerants.map((b,i)=>`
+        <span class="bel-chip">${b}</span>
+        ${i < p.belligerants.length-1 ? '<span class="bel-vs">vs</span>' : ''}`).join('')}
+    </div>` : '';
+
+  // Rois clés
+  const roisHTML = roisCles.map(r=>`
+    <a href="roi.html?id=${r.id}" class="perso-card">
+      <span class="perso-emoji">${r.portrait_emoji||'👑'}</span>
+      <div><span class="perso-name">${r.nom}</span><span class="perso-role">Règne ${r.debut_regne}–${r.fin_regne||'?'}</span></div>
+    </a>`).join('');
+
+  const persoHTML = persoSec.map(pp=>`
+    <a href="personnages.html" class="perso-card">
+      <span class="perso-emoji">${pp.portrait_emoji||'⚔'}</span>
+      <div><span class="perso-name">${pp.nom}</span><span class="perso-role">${pp.role||pp.dates||''}</span></div>
+    </a>`).join('');
+
+  // Battles sidebar
+  const bataillesHTML = batailles.map(b=>`
+    <div class="battle-mini" style="border-color:${b.vainqueur.includes('France')||b.vainqueur.includes('Clovis')||b.vainqueur.includes('Condé')||b.vainqueur.includes('Napoléon')?'rgba(58,138,90,.4)':'rgba(139,26,26,.4)'}">
+      <div class="battle-mini-name">⚔ ${b.nom} ${'★'.repeat(b.importance)}</div>
+      <div class="battle-mini-meta">${b.date} · ${b.vainqueur}</div>
+    </div>`).join('');
+
+  // Events of the period
+  const evts = HISTORIA.evenements.filter(e=>e.date>=p.debut&&e.date<=p.fin);
+  const evtsHTML = evts.map(e=>`
+    <div class="ct-event">
+      <div class="ct-dot" style="background:rgba(201,168,76,.2);border-color:rgba(201,168,76,.4)"></div>
+      <div class="ct-content">
+        <div class="ct-year">${e.date}</div>
+        <div class="ct-text">${e.titre}</div>
+      </div>
+    </div>`).join('');
+
+  // Duration
+  const duree = p.fin - p.debut;
+
+  document.getElementById('page-root').innerHTML = `
+    <!-- HERO -->
+    <div class="period-hero type-${p.type}">
+      <div class="period-hero-bg"></div>
+      <div class="period-hero-accent" style="background:radial-gradient(ellipse 60% 80% at 20% 60%,${p.couleur}22 0,transparent 70%)"></div>
+      <div class="period-hero-inner">
+        <div class="period-type-badge">${typeLabel(p.type)}</div>
+        <h1 class="period-title" style="color:${p.couleur === '#3A6B5A' ? 'var(--parchment)' : 'var(--parchment)'}">${p.titre}</h1>
+        <div class="period-dates" style="color:${p.couleur}">${p.debut} — ${p.fin} &nbsp;·&nbsp; ${duree} ans</div>
+        <p class="period-resume">${p.resume}</p>
+      </div>
+    </div>
+
+    ${belsHTML}
+
+    <!-- MAIN BODY -->
+    <div class="period-body">
+      <!-- LEFT: CHAPTERS -->
+      <div class="chapters">
+        <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:2rem;padding-bottom:.75rem;border-bottom:1px solid rgba(201,168,76,.12)">
+          CHRONOLOGIE — ${p.chapitres?.length||0} CHAPITRES
+        </div>
+        ${chaptersHTML}
+
+        ${evtsHTML ? `
+        <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:4px;color:var(--gold-dim);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:1px solid rgba(201,168,76,.1)">ÉVÉNEMENTS CLÉS</div>
+        <div class="chapter-timeline">
+          <div class="ct-line"></div>
+          <div style="padding-left:2rem">${evtsHTML}</div>
+        </div>` : ''}
+      </div>
+
+      <!-- RIGHT: SIDEBAR -->
+      <div class="period-sidebar">
+        <div class="sidebar-sticky">
+
+          <!-- Fiche rapide -->
+          <div class="sidebar-card">
+            <div class="sc-title">DONNÉES CLÉS</div>
+            <div class="sc-row"><span class="sc-label">DÉBUT</span><span class="sc-value">${p.debut}</span></div>
+            <div class="sc-row"><span class="sc-label">FIN</span><span class="sc-value">${p.fin}</span></div>
+            <div class="sc-row"><span class="sc-label">DURÉE</span><span class="sc-value">${duree} ans</span></div>
+            <div class="sc-row"><span class="sc-label">TYPE</span><span class="sc-value">${typeLabel(p.type)}</span></div>
+            ${p.belligerants?.length ? `<div class="sc-row"><span class="sc-label">PARTIES</span><span class="sc-value">${p.belligerants.length}</span></div>` : ''}
+            ${batailles.length ? `<div class="sc-row"><span class="sc-label">BATAILLES</span><span class="sc-value">${batailles.length} répertoriées</span></div>` : ''}
+          </div>
+
+          <!-- Personnages -->
+          ${roisHTML||persoHTML ? `
+          <div class="sidebar-card">
+            <div class="sc-title">ACTEURS PRINCIPAUX</div>
+            <div class="perso-grid">
+              ${roisHTML}
+              ${persoHTML}
+            </div>
+          </div>` : ''}
+
+          <!-- Batailles -->
+          ${bataillesHTML ? `
+          <div class="sidebar-card">
+            <div class="sc-title">BATAILLES (${batailles.length})</div>
+            ${bataillesHTML}
+          </div>` : ''}
+
+          <!-- Carte link -->
+          <div class="sidebar-card" style="text-align:center;cursor:pointer" onclick="window.location='cartes.html'">
+            <div class="sc-title">CARTE INTERACTIVE</div>
+            ${miniMapSVG(p.id, p.debut)}
+            <a href="cartes.html" style="display:block;margin-top:.6rem;font-family:Cinzel,serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);text-decoration:none;transition:color .2s"
+               onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--gold-dim)'">
+              Ouvrir la carte →
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERIOD NAVIGATION -->
+    <div class="period-nav">
+      <div class="period-nav-inner">
+        ${prev ? `<a href="periode.html?id=${prev.id}" class="pnav-card">
+          <span class="pnav-label">← PÉRIODE PRÉCÉDENTE</span>
+          <div class="pnav-title">${prev.titre}</div>
+          <div class="pnav-dates">${prev.debut} – ${prev.fin}</div>
+        </a>` : '<div></div>'}
+        ${next ? `<a href="periode.html?id=${next.id}" class="pnav-card next">
+          <span class="pnav-label">PÉRIODE SUIVANTE →</span>
+          <div class="pnav-title">${next.titre}</div>
+          <div class="pnav-dates">${next.debut} – ${next.fin}</div>
+        </a>` : '<div></div>'}
+      </div>
+    </div>
+
+    <!-- BACK NAV -->
+    <div class="back-nav">
+      <a href="index.html" class="bnav-link">⚜ Accueil</a>
+      <a href="frise.html" class="bnav-link">📜 Frise</a>
+      <a href="cartes.html" class="bnav-link">🗺 Cartes</a>
+      <a href="personnages.html" class="bnav-link">🧑 Personnages</a>
+      <a href="recits.html" class="bnav-link">📖 Story mode</a>
+    </div>`;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const id = getParam('id');
+  const p = id ? HISTORIA.utils.getPeriodeById(id) : HISTORIA.periodes[1]; // default = guerre_cent_ans
+  renderPeriodePage(p);
+});
+</script>
+</body>
+</html>
