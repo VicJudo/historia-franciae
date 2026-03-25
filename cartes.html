@@ -11,6 +11,7 @@
   --gold:#C9A84C;--gold-dim:#7A6230;--gold-faint:rgba(201,168,76,0.1);
   --stone:#0D0A06;--stone-mid:#1A1611;--stone-light:#2C2518;--stone-card:#1E1A10;
   --parchment:#F0E6CC;--parchment-dim:#C4B48A;
+  --red-battle:#C04030;--blue-ally:#4A7AB5;
 }
 html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchment);font-family:'EB Garamond',serif}
 
@@ -24,87 +25,80 @@ html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchm
 .layout{position:fixed;top:52px;left:0;right:0;bottom:0;display:grid;grid-template-columns:1fr 380px}
 
 /* ── LEFT: MAP ── */
-.map-col{position:relative;background:radial-gradient(ellipse 70% 70% at 50% 50%,#1a1a0e 0%,var(--stone) 100%);overflow:hidden;display:flex;flex-direction:column}
-
-/* MAP SVG CONTAINER */
+.map-col{position:relative;background:radial-gradient(ellipse 70% 70% at 50% 50%,#0d1520 0%,#070a0d 100%);overflow:hidden;display:flex;flex-direction:column}
 .map-stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#map-svg{width:100%;height:100%;max-width:600px;max-height:620px}
 
 /* YEAR OVERLAY */
-.year-overlay{position:absolute;top:20px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:10}
-.year-big{font-family:'Cinzel',serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--gold);opacity:.18;letter-spacing:.05em;line-height:1}
-.year-ruler{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;color:var(--gold-dim);opacity:.7;margin-top:.3rem}
-.dynasty-name-overlay{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--parchment-dim);opacity:.6;margin-top:.2rem}
+.year-overlay{position:absolute;top:16px;left:50%;transform:translateX(-50%);text-align:center;pointer-events:none;z-index:10}
+.year-big{font-family:'Cinzel',serif;font-size:clamp(2.5rem,5vw,3.5rem);font-weight:900;color:var(--gold);opacity:.15;letter-spacing:.05em;line-height:1}
+.year-ruler{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--gold-dim);opacity:.7;margin-top:.2rem}
+.dynasty-name-overlay{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--parchment-dim);opacity:.55;margin-top:.15rem}
+
+/* TERRITORY LABEL */
+.terr-label{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold);opacity:.6;pointer-events:none;white-space:nowrap;text-align:center}
 
 /* TIME CONTROLS */
-.time-controls{padding:1rem 1.5rem 1.2rem;background:rgba(13,10,6,.6);border-top:1px solid rgba(201,168,76,.1);flex-shrink:0}
-.slider-track{position:relative;margin-bottom:.6rem}
+.time-controls{padding:.9rem 1.4rem 1rem;background:rgba(13,10,6,.7);border-top:1px solid rgba(201,168,76,.1);flex-shrink:0}
+.slider-track{position:relative;margin-bottom:.5rem}
 #year-slider{width:100%;-webkit-appearance:none;height:3px;background:linear-gradient(90deg,var(--gold-dim) 0%,rgba(201,168,76,.15) 0%);outline:none;cursor:pointer;border-radius:2px}
-#year-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer;box-shadow:0 0 8px rgba(201,168,76,.4)}
-#year-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer}
-.slider-labels{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--gold-dim);opacity:.6}
-.play-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem}
-.play-btn{width:32px;height:32px;border:1px solid rgba(201,168,76,.3);background:transparent;color:var(--gold);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+#year-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer;box-shadow:0 0 8px rgba(201,168,76,.4)}
+#year-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--gold);border:2px solid var(--stone);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--gold-dim);opacity:.5;margin-bottom:.5rem}
+.play-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.play-btn{width:30px;height:30px;border:1px solid rgba(201,168,76,.3);background:transparent;color:var(--gold);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
 .play-btn:hover{background:rgba(201,168,76,.1);border-color:var(--gold)}
-.epoch-chips{display:flex;gap:.4rem;flex-wrap:wrap;flex:1}
-.epoch-chip{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;padding:4px 8px;border:1px solid rgba(201,168,76,.15);color:var(--parchment-dim);background:transparent;cursor:pointer;transition:all .2s;white-space:nowrap}
+.epoch-chips{display:flex;gap:.35rem;flex-wrap:wrap;flex:1}
+.epoch-chip{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;padding:3px 7px;border:1px solid rgba(201,168,76,.15);color:var(--parchment-dim);background:transparent;cursor:pointer;transition:all .2s;white-space:nowrap}
 .epoch-chip:hover{border-color:rgba(201,168,76,.4);color:var(--gold)}
 .epoch-chip.active{border-color:var(--gold);background:rgba(201,168,76,.1);color:var(--gold)}
 
-/* BATTLE TOOLTIP */
-.map-tooltip{position:absolute;z-index:50;background:rgba(13,10,6,.95);border:1px solid rgba(201,168,76,.35);padding:.6rem .8rem;pointer-events:none;opacity:0;transition:opacity .15s;max-width:200px;transform:translate(-50%,-110%)}
+/* MAP TOOLTIP */
+.map-tooltip{position:absolute;z-index:50;background:rgba(13,10,6,.96);border:1px solid rgba(201,168,76,.4);padding:.55rem .75rem;pointer-events:none;opacity:0;transition:opacity .15s;max-width:220px;transform:translate(-50%,-115%)}
 .map-tooltip.show{opacity:1}
 .map-tooltip-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);font-weight:700;margin-bottom:2px}
-.map-tooltip-meta{font-size:12px;color:var(--parchment-dim)}
+.map-tooltip-meta{font-size:12px;color:var(--parchment-dim);line-height:1.4}
 
 /* LEGEND */
-.map-legend{position:absolute;bottom:90px;left:16px;background:rgba(13,10,6,.85);border:1px solid rgba(201,168,76,.12);padding:.6rem .8rem;font-size:11px}
-.leg-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--parchment-dim);opacity:.7}
+.map-legend{position:absolute;bottom:96px;left:14px;background:rgba(13,10,6,.88);border:1px solid rgba(201,168,76,.12);padding:.55rem .7rem;font-size:11px}
+.leg-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.28rem;font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:1px;color:var(--parchment-dim);opacity:.75}
 .leg-row:last-child{margin-bottom:0}
-.leg-swatch{width:16px;height:10px;border-radius:1px;flex-shrink:0}
-.leg-diamond{width:8px;height:8px;transform:rotate(45deg);flex-shrink:0}
+.leg-swatch{width:14px;height:8px;border-radius:1px;flex-shrink:0}
+.leg-diamond{width:7px;height:7px;transform:rotate(45deg);flex-shrink:0}
 
 /* ── RIGHT: INFO PANEL ── */
 .info-col{background:var(--stone-card);border-left:1px solid rgba(201,168,76,.12);display:flex;flex-direction:column;overflow:hidden}
 .info-tabs{display:flex;border-bottom:1px solid rgba(201,168,76,.1);flex-shrink:0}
-.info-tab{flex:1;padding:.7rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment-dim);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.info-tab{flex:1;padding:.65rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment-dim);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
 .info-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
 .info-tab:hover{color:var(--parchment)}
-.info-scroll{flex:1;overflow-y:auto;padding:1.25rem;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
+.info-scroll{flex:1;overflow-y:auto;padding:1.2rem;scrollbar-width:thin;scrollbar-color:rgba(201,168,76,.2) transparent}
 .info-scroll::-webkit-scrollbar{width:4px}
 .info-scroll::-webkit-scrollbar-thumb{background:rgba(201,168,76,.15)}
-
-/* INFO CONTENT */
 .info-section{display:none}
 .info-section.active{display:block}
-.info-year-title{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:900;color:var(--gold);opacity:.4;margin-bottom:.1rem}
-.info-dynname{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;color:var(--parchment);margin-bottom:.25rem}
-.info-desc{font-size:14px;line-height:1.65;color:var(--parchment-dim);opacity:.85;margin-bottom:1rem}
-.info-ruler-row{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);margin-bottom:.5rem;cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
+.info-year-title{font-family:'Cinzel',serif;font-size:1.5rem;font-weight:900;color:var(--gold);opacity:.35;margin-bottom:.1rem}
+.info-dynname{font-family:'Cinzel',serif;font-size:.88rem;font-weight:700;color:var(--parchment);margin-bottom:.2rem}
+.info-desc{font-size:13.5px;line-height:1.65;color:var(--parchment-dim);opacity:.85;margin-bottom:1rem}
+.info-ruler-row{display:flex;align-items:center;gap:.65rem;padding:.55rem .75rem;background:rgba(201,168,76,.05);border:1px solid rgba(201,168,76,.1);margin-bottom:.45rem;cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
 .info-ruler-row:hover{border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.08)}
-.info-ruler-emoji{font-size:1.4rem;flex-shrink:0}
+.ruler-portrait{width:36px;height:36px;border-radius:2px;object-fit:cover;border:1px solid rgba(201,168,76,.2);flex-shrink:0}
+.ruler-portrait-placeholder{width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.12);flex-shrink:0}
 .info-ruler-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);display:block}
 .info-ruler-dates{font-size:11px;color:var(--parchment-dim);opacity:.6}
-
-.battle-entry{padding:.7rem .8rem;margin-bottom:.5rem;background:rgba(139,26,26,.08);border:1px solid rgba(139,26,26,.2);cursor:pointer;transition:all .2s}
-.battle-entry:hover{background:rgba(139,26,26,.15)}
+.battle-entry{padding:.65rem .75rem;margin-bottom:.45rem;background:rgba(139,26,26,.07);border:1px solid rgba(139,26,26,.2);cursor:pointer;transition:all .2s}
+.battle-entry:hover{background:rgba(139,26,26,.14)}
 .battle-entry-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);margin-bottom:.2rem}
-.battle-entry-meta{font-size:12px;color:var(--parchment-dim);opacity:.6}
-.battle-importance{display:inline-flex;gap:2px;margin-left:.4rem}
+.battle-entry-meta{font-size:12px;color:var(--parchment-dim);opacity:.65}
+.battle-importance{display:inline-flex;gap:2px;margin-left:.3rem}
 .battle-star{font-size:8px;color:var(--gold)}
-
-.section-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--gold-dim);margin:1rem 0 .5rem;padding-bottom:.3rem;border-bottom:1px solid rgba(201,168,76,.08)}
-
-/* TERRITORY INFO */
-.terr-card{padding:.8rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);margin-bottom:.75rem}
-.terr-card-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.3rem}
+.section-label{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:3px;color:var(--gold-dim);margin:1rem 0 .45rem;padding-bottom:.25rem;border-bottom:1px solid rgba(201,168,76,.08)}
+.terr-card{padding:.7rem .8rem;background:rgba(201,168,76,.04);border:1px solid rgba(201,168,76,.1);margin-bottom:.65rem}
+.terr-card-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--gold-dim);display:block;margin-bottom:.25rem}
 .terr-card-value{font-size:13px;color:var(--parchment-dim);line-height:1.4}
-
-/* COMPARE MODE */
-.compare-bar{display:flex;gap:.5rem;margin-bottom:.75rem}
-.compare-input{flex:1;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;padding:6px 10px;letter-spacing:1px}
+.compare-bar{display:flex;gap:.45rem;margin-bottom:.65rem}
+.compare-input{flex:1;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;padding:5px 9px;letter-spacing:1px}
 .compare-input::placeholder{color:var(--parchment-dim);opacity:.4}
-.compare-btn{padding:6px 12px;border:1px solid rgba(201,168,76,.25);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s}
+.compare-btn{padding:5px 11px;border:1px solid rgba(201,168,76,.25);background:transparent;color:var(--gold);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .2s}
 .compare-btn:hover{background:rgba(201,168,76,.1)}
 </style>
 </head>
@@ -120,130 +114,257 @@ html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchm
 
   <!-- LEFT: MAP -->
   <div class="map-col">
-    <div class="map-stage">
-      <!-- Year overlay -->
+    <div class="map-stage" id="mapStage">
+
       <div class="year-overlay">
         <div class="year-big" id="yearBig">481</div>
         <div class="year-ruler" id="yearRuler">MÉROVINGIENS</div>
         <div class="dynasty-name-overlay" id="dynastyOverlay">Règne de Clovis Ier</div>
       </div>
 
-      <!-- Main map SVG -->
-      <svg id="map-svg" viewBox="0 0 500 540" xmlns="http://www.w3.org/2000/svg">
+      <!-- ═══════════════════════════════════════
+           REAL SVG MAP OF EUROPE / FRANCE
+           ViewBox: Western Europe, roughly
+           lon -12..22, lat 35..58  →  700×620 px
+           Projection : simple équirectangulaire
+           lon→x : (lon+12)/(34)*700
+           lat→y : (58-lat)/(23)*620
+      ════════════════════════════════════════ -->
+      <svg id="map-svg" viewBox="0 0 700 620" xmlns="http://www.w3.org/2000/svg"
+           style="width:100%;height:100%;max-width:700px;max-height:620px">
         <defs>
-          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="softglow"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <radialGradient id="oceanGrad" cx="50%" cy="50%" r="60%">
+            <stop offset="0%" stop-color="#0d1a2a"/>
+            <stop offset="100%" stop-color="#060c12"/>
+          </radialGradient>
+          <pattern id="hatch-enemy" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="rgba(200,60,40,.55)" stroke-width="2"/>
+          </pattern>
         </defs>
 
-        <!-- Ocean/background -->
-        <rect width="500" height="540" fill="#0A0E14"/>
-        <!-- Grid lines (subtle) -->
-        <g stroke="rgba(255,255,255,0.03)" stroke-width="0.5">
-          <line x1="0" y1="135" x2="500" y2="135"/>
-          <line x1="0" y1="270" x2="500" y2="270"/>
-          <line x1="0" y1="405" x2="500" y2="405"/>
-          <line x1="125" y1="0" x2="125" y2="540"/>
-          <line x1="250" y1="0" x2="250" y2="540"/>
-          <line x1="375" y1="0" x2="375" y2="540"/>
-        </g>
+        <!-- Ocean -->
+        <rect width="700" height="620" fill="url(#oceanGrad)"/>
 
-        <!-- Neighboring regions (muted) -->
-        <!-- England -->
-        <path d="M 80 20 L 145 15 L 160 50 L 145 80 L 95 85 L 70 60 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
-        <text x="112" y="52" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Angleterre</text>
-        <!-- Germany/HRE -->
-        <path d="M 360 20 L 490 25 L 495 200 L 430 210 L 370 180 L 350 120 L 340 60 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
-        <text x="420" y="110" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Saint-Empire</text>
-        <!-- Spain -->
-        <path d="M 50 420 L 200 410 L 250 430 L 260 500 L 100 510 L 40 490 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
-        <text x="150" y="465" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Espagne</text>
+        <!-- ── NEIGHBOURING COUNTRIES (fixed geography) ── -->
+
+        <!-- Great Britain -->
+        <path id="gb" d="
+          M 118,6 L 148,4 L 172,14 L 180,30 L 170,50 L 155,68 L 135,78 L 115,82
+          L 100,70 L 90,55 L 95,35 L 108,18 Z
+          M 90,88 L 108,82 L 120,90 L 118,108 L 100,115 L 82,108 L 80,95 Z"
+          fill="#141c10" stroke="#2a3a22" stroke-width="0.8"/>
+        <text x="135" y="48" text-anchor="middle" font-family="serif" font-size="9" fill="#3a5a30" letter-spacing="1">Angleterre</text>
+        <text x="95" y="100" text-anchor="middle" font-family="serif" font-size="7" fill="#3a5a30">Écosse</text>
+
+        <!-- Iberian Peninsula / Spain -->
+        <path id="spain" d="
+          M 30,435 L 88,415 L 145,412 L 198,418 L 248,422 L 295,415 L 318,424
+          L 330,442 L 328,470 L 315,492 L 290,510 L 250,520 L 195,524
+          L 148,518 L 98,505 L 60,488 L 35,468 L 22,448 Z"
+          fill="#1a1508" stroke="#2a2010" stroke-width="0.8"/>
+        <text x="180" y="470" text-anchor="middle" font-family="serif" font-size="11" fill="#4a3818" letter-spacing="1">Espagne</text>
+
+        <!-- Low Countries / Netherlands-Belgium -->
+        <path id="lowcountries" d="
+          M 415,118 L 435,112 L 458,115 L 468,130 L 462,145 L 445,152 L 428,148 L 418,135 Z"
+          fill="#141a10" stroke="#242e18" stroke-width="0.7"/>
+        <text x="442" y="135" text-anchor="middle" font-family="serif" font-size="7" fill="#3a4a28">Flandre</text>
+
+        <!-- Holy Roman Empire / Germany -->
+        <path id="hre" d="
+          M 462,60 L 510,52 L 560,58 L 600,68 L 632,85 L 648,115 L 650,148
+          L 640,180 L 625,210 L 610,235 L 588,255 L 568,268 L 545,272
+          L 520,268 L 498,258 L 478,245 L 462,228 L 450,208 L 445,185
+          L 448,158 L 455,135 L 462,110 Z"
+          fill="#141010" stroke="#2a2018" stroke-width="0.8"/>
+        <text x="560" y="155" text-anchor="middle" font-family="serif" font-size="10" fill="#3a2820" letter-spacing="1">Saint-Empire</text>
+
+        <!-- Switzerland -->
+        <path id="swiss" d="
+          M 450,275 L 475,268 L 498,272 L 512,285 L 508,302 L 490,310 L 468,308 L 450,295 Z"
+          fill="#181515" stroke="#282222" stroke-width="0.7"/>
+
         <!-- Italy -->
-        <path d="M 370 320 L 450 310 L 480 390 L 440 490 L 390 470 L 365 400 Z" fill="#1a1a1a" stroke="#333" stroke-width="0.5"/>
-        <text x="418" y="395" text-anchor="middle" font-family="serif" font-size="9" fill="#444">Italie</text>
+        <path id="italy" d="
+          M 465,305 L 510,298 L 545,308 L 565,328 L 572,358 L 568,392
+          L 558,425 L 545,455 L 530,478 L 512,492 L 495,480 L 488,452
+          L 495,420 L 500,388 L 490,362 L 475,342 L 458,328 Z
+          M 545,490 L 560,485 L 572,495 L 568,510 L 552,512 L 540,502 Z"
+          fill="#141010" stroke="#2a2018" stroke-width="0.8"/>
+        <text x="522" y="390" text-anchor="middle" font-family="serif" font-size="10" fill="#3a2820" letter-spacing="1">Italie</text>
 
-        <!-- FRANCE BASE TERRITORY -->
-        <path id="france-territory" d="
-          M 165 55
-          L 210 42 L 265 38 L 310 48 L 340 62 L 355 88
-          L 358 120 L 345 145 L 358 168
-          L 362 195 L 348 225 L 358 258
-          L 348 285 L 330 308 L 295 328
-          L 268 345 L 245 365 L 225 382
-          L 198 398 L 172 405 L 148 395
-          L 118 375 L 95 350 L 78 320
-          L 68 290 L 72 260 L 58 232
-          L 55 200 L 65 172 L 55 148
-          L 58 120 L 72 98 L 88 78
-          L 118 60 Z"
-          fill="#2A2510" stroke="rgba(201,168,76,0.4)" stroke-width="1.5" id="france-base-path"/>
+        <!-- Burgundy/East region label area -->
 
-        <!-- Territory overlay (changes dynamically) -->
-        <path id="territory-main" d="" fill="rgba(201,168,76,0.15)" stroke="rgba(201,168,76,0.5)" stroke-width="1" opacity="0" style="transition:all .8s ease"/>
-
-        <!-- Occupation overlay (enemy zones) -->
-        <path id="territory-enemy" d="" fill="rgba(139,26,26,0.2)" stroke="rgba(200,50,50,0.5)" stroke-width="1" stroke-dasharray="4 3" opacity="0" style="transition:all .6s"/>
-
-        <!-- Ally overlay -->
-        <path id="territory-ally" d="" fill="rgba(26,46,90,0.25)" stroke="rgba(74,122,181,0.5)" stroke-width="1" opacity="0" style="transition:all .6s"/>
-
-        <!-- Brittany peninsula -->
-        <path d="M 68 168 L 45 155 L 22 148 L 10 162 L 18 182 L 42 192 L 60 188 Z"
-          fill="#2A2510" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+        <!-- ── FRANCE BASE (realistic shape) ── -->
+        <!-- Real France path: faithful to actual geography -->
+        <path id="france-base" d="
+          M 185,128
+          C 195,118 210,112 225,108 C 240,104 258,102 272,98
+          C 290,94 308,90 322,88 C 338,86 352,88 362,95
+          C 372,102 378,112 382,122 C 386,134 385,148 382,160
+          C 379,172 372,182 368,195 C 364,208 365,222 368,236
+          C 371,250 376,262 378,278 C 380,294 378,310 372,325
+          C 366,340 356,352 344,362 C 332,372 318,380 304,388
+          C 290,396 274,402 258,408 C 242,414 225,418 208,420
+          C 192,422 175,420 160,415 C 145,410 132,402 120,392
+          C 108,382 98,368 90,354 C 82,340 76,324 72,308
+          C 68,292 66,275 66,258 C 66,242 68,225 72,210
+          C 76,195 82,182 85,168 C 88,154 88,140 90,126
+          C 92,112 98,100 108,92 C 118,84 132,80 148,80
+          C 162,80 175,85 185,92 Z
+          M 68,195 C 58,192 45,190 34,188 C 23,186 14,186 8,190
+          C 4,194 4,200 8,208 C 12,216 20,222 30,226
+          C 40,230 52,232 62,230 C 70,228 76,222 78,215
+          C 80,208 76,198 68,195 Z"
+          fill="#1e1a08" stroke="rgba(201,168,76,0.22)" stroke-width="1.2"/>
 
         <!-- Corsica -->
-        <ellipse cx="420" cy="420" rx="14" ry="22" fill="#2A2510" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
-        <text x="420" y="424" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Corse</text>
+        <path d="M 468,378 C 472,370 478,366 482,368 C 486,370 488,378 486,388
+                 C 484,398 478,406 472,408 C 466,408 462,402 462,393
+                 C 462,385 465,380 468,378 Z"
+          fill="#1e1a08" stroke="rgba(201,168,76,0.2)" stroke-width="0.8"/>
+        <text x="475" y="392" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Corse</text>
 
-        <!-- Paris marker (fixed) -->
-        <circle id="paris-marker" cx="212" cy="148" r="5" fill="var(--gold)" opacity="0.85"/>
-        <circle cx="212" cy="148" r="9" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
-        <text x="220" y="144" font-family="'Cinzel',serif" font-size="9" fill="rgba(201,168,76,0.8)">Paris</text>
+        <!-- Pyrenees mountains (decorative) -->
+        <path d="M 88,415 L 105,408 L 122,405 L 140,408 L 158,412 L 175,415 L 192,418 L 210,420 L 228,422 L 248,422"
+          fill="none" stroke="rgba(201,168,76,0.15)" stroke-width="1" stroke-dasharray="3 4"/>
 
-        <!-- Battle markers (placed dynamically) -->
+        <!-- Alps (decorative) -->
+        <path d="M 382,265 L 400,258 L 420,252 L 440,248 L 458,248 L 472,252 L 485,260"
+          fill="none" stroke="rgba(201,168,76,0.15)" stroke-width="1" stroke-dasharray="3 4"/>
+
+        <!-- Rhine river -->
+        <path d="M 462,60 L 455,85 L 450,112 L 448,140 L 448,168 L 452,195 L 458,218 L 462,242 L 462,268"
+          fill="none" stroke="rgba(74,122,181,0.2)" stroke-width="1.2"/>
+
+        <!-- Loire river -->
+        <path d="M 275,318 L 248,308 L 222,300 L 195,295 L 168,292 L 148,295 L 128,302"
+          fill="none" stroke="rgba(74,122,181,0.18)" stroke-width="1"/>
+
+        <!-- Seine river -->
+        <path d="M 318,188 L 295,178 L 268,168 L 242,162 L 215,158 L 195,162 L 178,172"
+          fill="none" stroke="rgba(74,122,181,0.18)" stroke-width="1"/>
+
+        <!-- ── DYNAMIC LAYERS (JS-controlled) ── -->
+
+        <!-- Territory overlay — main royal/French territory -->
+        <path id="territory-main" d="" fill="rgba(201,168,76,0.12)" stroke="rgba(201,168,76,0.5)" stroke-width="1.5" opacity="0" style="transition:all .7s ease"/>
+
+        <!-- Enemy / occupation zones -->
+        <path id="territory-enemy" d="" fill="url(#hatch-enemy)" stroke="rgba(200,60,40,.6)" stroke-width="1.2" stroke-dasharray="5 3" opacity="0" style="transition:all .5s"/>
+
+        <!-- Ally / vassal zones -->
+        <path id="territory-ally" d="" fill="rgba(26,46,90,0.22)" stroke="rgba(74,122,181,0.5)" stroke-width="1" opacity="0" style="transition:all .5s"/>
+
+        <!-- Domain royal (core territory, brighter) -->
+        <path id="domain-royal" d="" fill="rgba(201,168,76,0.28)" stroke="rgba(201,168,76,.8)" stroke-width="1.5" opacity="0" style="transition:all .6s"/>
+
+        <!-- ── CITIES ── -->
+        <g id="cities-group">
+          <!-- Paris -->
+          <circle cx="268" cy="162" r="5" fill="var(--gold)" opacity="0.9" filter="url(#glow)"/>
+          <circle cx="268" cy="162" r="9" fill="none" stroke="rgba(201,168,76,0.3)" stroke-width="1"/>
+          <text x="278" y="158" font-family="'Cinzel',serif" font-size="9.5" fill="rgba(201,168,76,0.9)" font-weight="700">Paris</text>
+
+          <!-- Lyon -->
+          <circle cx="348" cy="295" r="3" fill="rgba(201,168,76,.55)" opacity="0.8"/>
+          <text x="356" y="298" font-family="serif" font-size="7.5" fill="rgba(201,168,76,0.55)">Lyon</text>
+
+          <!-- Marseille -->
+          <circle cx="350" cy="385" r="3" fill="rgba(201,168,76,.5)"/>
+          <text x="358" y="388" font-family="serif" font-size="7.5" fill="rgba(201,168,76,0.5)">Marseille</text>
+
+          <!-- Bordeaux -->
+          <circle cx="155" cy="342" r="3" fill="rgba(201,168,76,.5)"/>
+          <text x="163" y="345" font-family="serif" font-size="7.5" fill="rgba(201,168,76,0.5)">Bordeaux</text>
+
+          <!-- Orléans -->
+          <circle cx="258" cy="215" r="2.5" fill="rgba(201,168,76,.45)"/>
+          <text x="266" y="218" font-family="serif" font-size="7" fill="rgba(201,168,76,0.45)">Orléans</text>
+
+          <!-- Reims -->
+          <circle cx="305" cy="158" r="2.5" fill="rgba(201,168,76,.45)"/>
+          <text x="313" y="161" font-family="serif" font-size="7" fill="rgba(201,168,76,0.45)">Reims</text>
+
+          <!-- Toulouse -->
+          <circle cx="218" cy="392" r="2.5" fill="rgba(201,168,76,.45)"/>
+          <text x="226" y="395" font-family="serif" font-size="7" fill="rgba(201,168,76,0.45)">Toulouse</text>
+
+          <!-- Strasbourg -->
+          <circle cx="432" cy="185" r="2.5" fill="rgba(201,168,76,.4)"/>
+          <text x="440" y="188" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Strasbourg</text>
+
+          <!-- Rouen -->
+          <circle cx="238" cy="140" r="2.5" fill="rgba(201,168,76,.4)"/>
+          <text x="246" y="143" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Rouen</text>
+
+          <!-- Calais -->
+          <circle cx="248" cy="112" r="2.5" fill="rgba(201,168,76,.4)"/>
+          <text x="256" y="115" font-family="serif" font-size="7" fill="rgba(201,168,76,0.4)">Calais</text>
+
+          <!-- Aix-la-Chapelle (Carolingiens) -->
+          <circle cx="460" cy="142" r="2.5" fill="rgba(201,168,76,.35)" id="aachen-marker"/>
+          <text x="466" y="145" font-family="serif" font-size="7" fill="rgba(201,168,76,0.35)" id="aachen-label">Aix-la-Chapelle</text>
+
+          <!-- Rome -->
+          <circle cx="510" cy="445" r="2.5" fill="rgba(201,168,76,.3)"/>
+          <text x="518" y="448" font-family="serif" font-size="7" fill="rgba(201,168,76,0.3)">Rome</text>
+
+          <!-- Madrid -->
+          <circle cx="168" cy="468" r="2.5" fill="rgba(201,168,76,.3)"/>
+          <text x="176" y="471" font-family="serif" font-size="7" fill="rgba(201,168,76,0.3)">Madrid</text>
+        </g>
+
+        <!-- ── BATTLE MARKERS ── -->
         <g id="battle-markers-group"></g>
 
-        <!-- City markers (placed dynamically) -->
-        <g id="city-markers-group"></g>
-
-        <!-- Domain royal indicator -->
-        <path id="domain-royal" d="" fill="rgba(201,168,76,0.35)" stroke="var(--gold)" stroke-width="1.5" opacity="0"/>
-
+        <!-- ── DECORATIVE ── -->
         <!-- Compass rose -->
-        <g transform="translate(455,480)" opacity="0.35">
-          <line x1="0" y1="-16" x2="0" y2="16" stroke="rgba(201,168,76,0.6)" stroke-width="0.8"/>
-          <line x1="-16" y1="0" x2="16" y2="0" stroke="rgba(201,168,76,0.6)" stroke-width="0.8"/>
-          <polygon points="0,-16 -4,-8 0,-4 4,-8" fill="rgba(201,168,76,0.8)"/>
+        <g transform="translate(648,555)" opacity="0.35">
+          <circle r="18" fill="none" stroke="rgba(201,168,76,0.2)" stroke-width="0.8"/>
+          <line x1="0" y1="-15" x2="0" y2="15" stroke="rgba(201,168,76,0.5)" stroke-width="0.8"/>
+          <line x1="-15" y1="0" x2="15" y2="0" stroke="rgba(201,168,76,0.5)" stroke-width="0.8"/>
+          <polygon points="0,-15 -3,-7 0,-3 3,-7" fill="rgba(201,168,76,0.8)"/>
           <text x="0" y="-20" text-anchor="middle" font-family="serif" font-size="8" fill="rgba(201,168,76,0.6)">N</text>
         </g>
 
-        <!-- Scale indicator -->
-        <g transform="translate(30,510)" opacity="0.4">
-          <line x1="0" y1="0" x2="60" y2="0" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
-          <line x1="0" y1="-4" x2="0" y2="4" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
-          <line x1="60" y1="-4" x2="60" y2="4" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
-          <text x="30" y="-6" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.5)">~500 km</text>
+        <!-- Scale -->
+        <g transform="translate(30,590)" opacity="0.4">
+          <line x1="0" y1="0" x2="70" y2="0" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <line x1="70" y1="-3" x2="70" y2="3" stroke="rgba(201,168,76,0.5)" stroke-width="1"/>
+          <text x="35" y="-5" text-anchor="middle" font-family="serif" font-size="7" fill="rgba(201,168,76,0.5)">~600 km</text>
         </g>
+
+        <!-- Map tooltip -->
+        <foreignObject x="0" y="0" width="1" height="1" overflow="visible">
+          <div id="mapTooltip" class="map-tooltip">
+            <div class="map-tooltip-name" id="tt-name"></div>
+            <div class="map-tooltip-meta" id="tt-meta"></div>
+          </div>
+        </foreignObject>
       </svg>
 
-      <!-- Map tooltip -->
-      <div class="map-tooltip" id="mapTooltip">
-        <div class="map-tooltip-name" id="tt-name"></div>
-        <div class="map-tooltip-meta" id="tt-meta"></div>
-      </div>
+      <!-- Territory label bottom -->
+      <div class="terr-label" id="terrLabel"></div>
 
       <!-- Legend -->
       <div class="map-legend">
-        <div class="leg-row"><div class="leg-swatch" style="background:rgba(201,168,76,0.3);border:1px solid rgba(201,168,76,0.5)"></div>Domaine royal</div>
-        <div class="leg-row"><div class="leg-swatch" style="background:rgba(139,26,26,0.3);border:1px dashed rgba(200,50,50,0.5)"></div>Territoire ennemi</div>
-        <div class="leg-row"><div class="leg-swatch" style="background:rgba(26,46,90,0.3);border:1px solid rgba(74,122,181,0.5)"></div>Allié / Vassal</div>
-        <div class="leg-row"><div class="leg-diamond" style="background:#C04030"></div>Bataille (victoire)</div>
-        <div class="leg-row"><div class="leg-diamond" style="background:#4A4A7A"></div>Bataille (défaite)</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(201,168,76,0.25);border:1px solid rgba(201,168,76,.6)"></div>Territoire royal / France</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(201,168,76,0.5);border:1.5px solid rgba(201,168,76,.9)"></div>Domaine royal (cœur)</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:repeating-linear-gradient(45deg,rgba(200,60,40,.4),rgba(200,60,40,.4) 2px,transparent 2px,transparent 5px);border:1px dashed rgba(200,60,40,.6)"></div>Zone ennemie / occupation</div>
+        <div class="leg-row"><div class="leg-swatch" style="background:rgba(26,46,90,0.3);border:1px solid rgba(74,122,181,.5)"></div>Allié / Vassal</div>
+        <div class="leg-row"><div class="leg-diamond" style="background:#C04030;border:1px solid rgba(200,60,40,.4)"></div>Bataille (victoire fr.)</div>
+        <div class="leg-row"><div class="leg-diamond" style="background:#6060a0;border:1px solid rgba(100,100,160,.4)"></div>Bataille (défaite fr.)</div>
       </div>
     </div>
 
     <!-- TIME CONTROLS -->
     <div class="time-controls">
       <div class="play-row">
-        <button class="play-btn" id="playBtn" onclick="togglePlay()" title="Animer">▶</button>
+        <button class="play-btn" id="playBtn" onclick="togglePlay()" title="Animer (Espace)">▶</button>
         <div class="epoch-chips" id="epochChips"></div>
       </div>
       <div class="slider-track">
@@ -263,16 +384,15 @@ html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchm
       <button class="info-tab" onclick="switchTab('territoire',this)">TERRITOIRE</button>
     </div>
     <div class="info-scroll">
+
       <!-- CONTEXT TAB -->
       <div class="info-section active" id="tab-context">
         <div class="info-year-title" id="ctx-year">481</div>
         <div class="info-dynname" id="ctx-dyn">Mérovingiens</div>
-        <p class="info-desc" id="ctx-desc">Clovis Ier fonde le royaume franc unifié après la victoire contre Syagrius.</p>
-
+        <p class="info-desc" id="ctx-desc"></p>
         <div class="section-label">SOUVERAIN(S) EN PLACE</div>
         <div id="ctx-rulers"></div>
-
-        <div class="section-label" id="evt-label" style="margin-top:1.25rem">ÉVÉNEMENTS DE L'ÉPOQUE</div>
+        <div class="section-label" style="margin-top:1.2rem">ÉVÉNEMENTS DE L'ÉPOQUE</div>
         <div id="ctx-events"></div>
       </div>
 
@@ -286,7 +406,6 @@ html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchm
       <div class="info-section" id="tab-territoire">
         <div class="section-label">ÉTAT DU TERRITOIRE</div>
         <div id="terr-info"></div>
-
         <div class="section-label" style="margin-top:1rem">COMPARER DEUX ÉPOQUES</div>
         <div class="compare-bar">
           <input class="compare-input" id="cmp-year1" type="number" placeholder="Année 1" min="481" max="1969" value="987">
@@ -305,74 +424,505 @@ html,body{height:100%;overflow:hidden;background:var(--stone);color:var(--parchm
 let currentYear = 481;
 let isPlaying = false;
 let playInterval = null;
-let activeTab = 'context';
 
-// ── TERRITORY DATA ──
-// Simplified SVG paths for each major era
+// ═══════════════════════════════════════════════════════════
+// TERRITORY DATA — real SVG paths matching the France base
+// All paths use the coordinate system of the 700×620 viewBox
+// France centroid ≈ (230, 280)
+//
+// Key reference points on the France path:
+//  NW Brittany: ~(34,200)   NE border: ~(432,185)
+//  SW (Basque): ~(108,415)  SE (Côte d'Azur): ~(385,392)
+//  Paris: (268,162)         Loire: y≈285-310
+// ═══════════════════════════════════════════════════════════
 const TERRITORIES = {
-  481:  { main: "M 165 55 L 265 38 L 340 62 L 358 120 L 362 195 L 295 328 L 172 405 L 68 290 L 55 148 L 88 78 Z", enemy:"", ally:"", domain:"M 180 90 L 260 82 L 310 105 L 300 160 L 240 175 L 165 160 L 155 120 Z", label:"Royaume franc initial" },
-  600:  { main: "M 145 42 L 310 28 L 360 55 L 370 130 L 365 200 L 325 320 L 198 408 L 68 290 L 48 160 L 65 90 Z", enemy:"", ally:"", domain:"M 165 75 L 285 65 L 330 100 L 318 170 L 248 188 L 158 172 L 145 128 Z", label:"Royaume mérovingien" },
-  800:  { main: "M 80 18 L 355 8 L 490 70 L 495 260 L 440 310 L 365 290 L 340 400 L 198 408 L 42 280 L 20 148 L 50 60 Z", enemy:"", ally:"M 52 308 L 200 290 L 248 370 L 200 408 L 80 390 L 42 340 Z", domain:"M 175 80 L 280 65 L 330 105 L 320 165 L 250 182 L 165 165 L 148 120 Z", label:"Empire carolingien" },
-  987:  { main: "M 155 52 L 270 40 L 342 62 L 355 122 L 360 192 L 298 328 L 172 408 L 68 290 L 52 148 L 85 78 Z", enemy:"M 160 52 L 268 40 L 295 55 L 288 110 L 240 125 L 170 108 L 158 75 Z", ally:"", domain:"M 178 95 L 240 88 L 265 115 L 255 152 L 212 162 L 172 148 L 165 118 Z", label:"Domaine royal réduit" },
-  1180: { main: "M 152 50 L 270 38 L 345 62 L 358 125 L 362 198 L 298 328 L 168 408 L 65 290 L 50 145 L 82 75 Z", enemy:"M 145 50 L 220 38 L 235 55 L 215 98 L 172 105 L 148 88 Z", ally:"", domain:"M 172 80 L 265 68 L 312 98 L 298 165 L 238 182 L 165 168 L 148 122 Z", label:"Avant Philippe Auguste" },
-  1223: { main: "M 148 48 L 270 36 L 348 62 L 360 128 L 365 200 L 302 328 L 168 408 L 62 290 L 48 142 L 80 72 Z", enemy:"", ally:"", domain:"M 165 65 L 292 52 L 340 90 L 325 180 L 252 198 L 155 182 L 138 128 Z", label:"Philippe Auguste — territoire triplé" },
-  1328: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"", ally:"", domain:"M 158 58 L 305 45 L 355 88 L 342 195 L 265 212 L 148 195 L 128 138 Z", label:"France capétienne à l'apogée" },
-  1360: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 148 48 L 205 42 L 235 65 L 228 115 L 195 128 L 152 115 L 138 78 Z", ally:"", domain:"M 188 95 L 272 82 L 308 118 L 295 175 L 235 192 L 182 178 L 162 132 Z", label:"Traité de Brétigny — cessions à l'Angleterre" },
-  1429: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 148 48 L 280 38 L 340 68 L 332 145 L 275 158 L 178 145 L 148 95 Z", ally:"M 268 38 L 348 58 L 362 130 L 325 165 L 278 158 L 285 90 Z", domain:"M 192 158 L 265 145 L 295 178 L 280 228 L 218 242 L 185 225 Z", label:"Guerre de Cent Ans — zones d'occupation" },
-  1453: { main: "M 148 48 L 272 36 L 350 62 L 362 130 L 368 202 L 305 330 L 168 410 L 60 292 L 46 140 L 78 70 Z", enemy:"M 170 55 L 210 48 L 225 68 L 218 95 L 188 102 L 168 88 Z", ally:"", domain:"M 155 58 L 305 45 L 355 88 L 342 192 L 262 210 L 148 195 L 128 138 Z", label:"Victoire finale — seul Calais manque" },
-  1515: { main: "M 145 45 L 272 34 L 352 60 L 365 132 L 370 205 L 308 332 L 165 412 L 58 295 L 43 138 L 75 68 Z", enemy:"", ally:"M 340 60 L 395 52 L 420 100 L 400 155 L 355 148 L 340 105 Z", domain:"M 152 55 L 308 42 L 358 85 L 345 195 L 260 212 L 145 198 L 125 135 Z", label:"François Ier — après Marignan" },
-  1643: { main: "M 142 43 L 272 32 L 355 58 L 368 135 L 372 208 L 310 335 L 162 415 L 55 298 L 40 135 L 72 65 Z", enemy:"", ally:"M 342 58 L 398 50 L 425 102 L 402 158 L 352 150 L 338 105 Z", domain:"M 148 52 L 312 38 L 362 82 L 348 198 L 258 215 L 142 200 L 120 132 Z", label:"Louis XIV — début du Grand Siècle" },
-  1715: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Louis XIV — apogée territorial" },
-  1789: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Veille de la Révolution" },
-  1811: { main: "M 50 8 L 490 5 L 495 305 L 435 318 L 358 295 L 328 415 L 195 418 L 28 295 L 10 148 L 32 50 Z", enemy:"", ally:"M 50 298 L 195 282 L 248 375 L 198 418 L 55 398 L 30 342 Z", domain:"M 138 40 L 315 28 L 368 72 L 352 198 L 252 218 L 135 202 L 112 125 Z", label:"Empire napoléonien à l'apogée" },
-  1815: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 312 36 L 365 80 L 350 200 L 252 218 L 138 205 L 115 128 Z", label:"Restauration — frontières de 1792" },
-  1870: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"M 338 55 L 375 60 L 378 110 L 348 118 L 330 90 Z", ally:"", domain:"M 142 48 L 312 36 L 365 80 L 350 200 L 252 218 L 138 205 L 115 128 Z", label:"IIIe République — perte Alsace-Lorraine" },
-  1918: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Après la Grande Guerre — Alsace-Lorraine retrouvée" },
-  1958: { main: "M 138 40 L 272 28 L 358 55 L 372 138 L 378 212 L 315 338 L 158 418 L 50 302 L 35 132 L 68 60 Z", enemy:"", ally:"", domain:"M 142 48 L 315 35 L 368 80 L 352 202 L 255 220 L 138 205 L 115 128 Z", label:"Ve République — France actuelle" },
+
+  // ── MÉROVINGIENS ──
+  481: {
+    main: `M 185,128 C 195,118 210,112 225,108 C 240,104 258,102 272,98
+           C 290,94 308,90 322,88 C 338,86 352,88 362,95 C 372,102 378,112 382,122
+           C 386,134 385,148 382,160 C 368,195 365,222 368,236
+           C 371,250 376,262 378,278 C 375,295 362,318 344,336
+           C 328,352 305,368 278,382 C 252,396 225,408 195,415
+           C 168,420 145,415 125,402 C 105,388 88,368 78,345
+           C 68,322 65,295 68,268 C 70,242 78,218 85,195
+           C 90,172 92,148 96,126 C 100,105 112,90 130,84
+           C 148,78 168,82 185,92 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 215,138 C 232,130 252,126 270,128 C 288,130 302,138 310,150
+             C 318,162 318,178 312,192 C 306,205 292,215 275,220
+             C 258,224 240,220 226,212 C 212,204 205,190 204,175
+             C 203,160 208,146 215,138 Z`,
+    label: "Clovis Ier — royaume franc initial (481)",
+    scale: "france"
+  },
+
+  600: {
+    main: `M 175,118 C 192,105 215,98 240,94 C 265,90 292,88 315,88
+           C 342,88 365,92 378,102 C 392,112 395,128 392,145
+           C 388,162 378,178 372,198 C 366,218 368,238 372,258
+           C 376,278 378,298 372,318 C 365,338 350,355 332,370
+           C 314,385 292,398 268,408 C 244,418 218,422 192,420
+           C 165,418 140,410 118,396 C 96,382 78,360 66,335
+           C 54,310 48,280 50,252 C 52,224 62,198 74,175
+           C 86,152 98,132 110,115 C 124,98 140,88 158,84
+           C 175,80 185,88 185,105 Z
+           M 68,195 C 58,192 42,190 28,190 C 16,192 8,198 8,208
+           C 8,218 16,226 28,228 C 40,230 55,228 65,222
+           C 74,216 76,205 68,195 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 210,130 C 228,122 250,118 270,120 C 290,122 308,132 316,146
+             C 324,160 322,178 312,192 C 302,206 285,215 265,218
+             C 245,220 226,214 215,202 C 204,190 200,174 204,160
+             C 207,147 210,137 210,130 Z`,
+    label: "Royaume mérovingien (vers 600)",
+    scale: "france"
+  },
+
+  // ── CAROLINGIENS — Empire ──
+  800: {
+    main: `M 90,18 C 120,12 158,8 198,6 C 238,4 278,4 318,8
+           C 358,12 395,20 428,32 C 460,44 488,60 508,80
+           C 528,100 538,122 542,148 C 546,174 540,200 528,225
+           C 516,250 498,272 478,292 C 458,312 435,330 410,346
+           C 385,362 358,376 330,388 C 302,400 272,410 242,418
+           C 212,426 180,430 150,428 C 120,426 92,418 68,404
+           C 44,390 24,368 12,342 C 0,316 -4,285 2,255
+           C 8,225 22,198 38,172 C 54,146 72,122 88,100
+           C 100,82 100,55 100,35 C 98,25 92,20 90,18 Z
+           M 68,195 C 58,192 42,190 28,190 C 16,192 8,200 10,212
+           C 12,222 22,230 35,230 C 48,230 60,224 66,215 Z`,
+    enemy: "",
+    ally: `M 48,420 C 65,408 88,400 115,398 C 142,396 168,402 188,415
+           C 208,428 220,445 215,462 C 210,478 195,490 175,495
+           C 155,500 130,495 110,482 C 90,469 75,450 68,432
+           C 62,415 48,430 48,420 Z`,
+    domain: `M 225,125 C 245,115 268,112 290,115 C 312,118 330,128 340,144
+             C 350,160 348,180 338,196 C 328,212 310,222 288,226
+             C 266,230 244,224 228,212 C 212,200 205,182 208,165
+             C 210,148 218,134 225,125 Z`,
+    label: "Empire carolingien à son apogée — Charlemagne (800)",
+    scale: "europe"
+  },
+
+  843: {
+    main: `M 130,98 C 148,84 172,76 198,74 C 224,72 252,76 275,85
+           C 298,94 318,108 332,126 C 346,144 352,165 348,188
+           C 344,210 332,230 318,248 C 304,266 286,282 265,296
+           C 310,305 355,302 392,292 C 430,282 460,262 480,238
+           C 500,214 510,185 508,155 C 506,125 494,96 475,72
+           C 456,48 428,28 395,15 C 362,2 322,-2 285,5
+           C 248,12 212,28 182,52 C 152,76 130,108 130,98 Z`,
+    enemy: `M 332,126 C 345,108 362,95 382,90 C 402,85 425,88 445,98
+            C 465,108 480,125 482,145 C 484,165 472,185 452,198
+            C 432,210 405,215 380,210 C 355,205 335,192 325,175
+            C 315,158 318,140 332,126 Z`,
+    ally: "",
+    domain: `M 215,135 C 232,127 252,123 272,126 C 292,129 308,140 315,155
+             C 322,170 318,188 305,200 C 292,212 272,218 252,215
+             C 232,212 215,200 210,185 C 204,170 206,152 215,135 Z`,
+    label: "Traité de Verdun — Francia Occidentalis (843)",
+    scale: "france"
+  },
+
+  // ── CAPÉTIENS ──
+  987: {
+    main: `M 155,108 C 168,95 186,86 205,82 C 224,78 244,80 262,88
+           C 280,96 295,110 305,128 C 315,146 318,168 312,190
+           C 306,210 292,228 275,242 C 258,256 238,266 215,272
+           C 192,278 168,278 148,268 C 128,258 112,240 102,218
+           C 92,196 88,170 92,145 C 96,120 108,98 125,88
+           C 138,80 148,108 155,108 Z
+           M 152,108 C 162,95 175,88 188,86 C 201,84 215,88 225,98
+           C 235,108 238,122 232,136 C 226,150 212,160 196,162
+           C 180,164 164,156 156,144 C 148,132 148,118 152,108 Z`,
+    enemy: `M 155,82 C 168,72 185,68 202,70 C 218,72 232,80 240,94
+            C 248,108 246,125 235,135 C 224,145 206,148 190,142
+            C 174,136 162,122 160,108 C 158,94 155,90 155,82 Z
+            M 65,160 C 50,165 35,168 25,178 C 15,188 14,200 22,210
+            C 30,220 45,224 62,220 C 78,216 92,205 98,192
+            C 104,179 98,165 88,162 C 80,159 70,158 65,160 Z`,
+    ally: "",
+    domain: `M 248,145 C 258,138 272,135 285,138 C 298,141 308,150 312,162
+             C 316,174 312,188 302,198 C 292,208 276,213 260,210
+             C 244,207 232,197 228,184 C 224,171 228,155 248,145 Z`,
+    label: "Hugues Capet — domaine royal = Île-de-France seulement (987)",
+    scale: "france"
+  },
+
+  1180: {
+    main: `M 165,108 C 178,95 196,86 215,82 C 234,78 255,80 272,90
+           C 292,100 308,116 320,136 C 332,156 336,180 330,204
+           C 324,228 310,248 292,264 C 274,280 252,292 228,298
+           C 204,304 178,304 155,292 C 132,280 112,260 100,236
+           C 88,212 84,184 88,158 C 92,132 104,108 122,94
+           C 140,80 158,98 165,108 Z`,
+    enemy: `M 148,82 C 160,72 175,66 190,68 C 205,70 218,78 224,92
+            C 230,106 226,122 215,130 C 204,138 188,140 174,134
+            C 160,128 150,115 150,102 C 150,92 148,88 148,82 Z
+            M 80,175 C 68,168 55,168 45,175 C 35,182 32,195 38,208
+            C 44,221 58,228 74,226 C 90,224 102,214 106,200
+            C 110,186 100,180 80,175 Z`,
+    ally: "",
+    domain: `M 230,138 C 248,128 268,125 286,130 C 304,135 316,148 318,164
+             C 320,180 312,196 298,205 C 284,214 265,216 248,210
+             C 231,204 220,191 218,176 C 216,161 222,147 230,138 Z`,
+    label: "Avant Philippe Auguste — grandes seigneuries indépendantes (1180)",
+    scale: "france"
+  },
+
+  1223: {
+    main: `M 158,102 C 172,88 192,78 215,75 C 238,72 262,76 282,88
+           C 305,100 322,120 332,144 C 342,168 342,196 332,222
+           C 322,248 302,270 278,285 C 254,300 225,308 195,308
+           C 165,308 136,300 112,282 C 88,264 70,238 60,208
+           C 50,178 50,145 62,115 C 74,85 96,62 122,52
+           C 148,42 172,54 175,72 C 165,90 158,100 158,102 Z
+           M 68,195 C 56,190 42,188 30,192 C 18,196 10,206 14,218
+           C 18,230 32,236 48,232 C 64,228 76,216 74,205 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 205,118 C 228,106 255,102 278,108 C 301,114 318,130 322,150
+             C 326,170 316,192 298,205 C 280,218 255,222 230,215
+             C 205,208 188,192 185,172 C 182,152 188,132 205,118 Z`,
+    label: "Philippe Auguste — domaine triplé après Bouvines (1223)",
+    scale: "france"
+  },
+
+  1328: {
+    main: `M 158,98 C 172,84 195,74 220,70 C 245,66 272,70 294,82
+           C 318,94 336,115 345,140 C 354,165 352,194 340,220
+           C 328,246 306,268 280,282 C 254,296 224,302 193,298
+           C 162,294 132,282 108,260 C 84,238 68,208 62,175
+           C 56,142 62,108 78,82 C 95,56 120,40 148,38
+           C 162,37 165,60 162,78 C 160,94 158,100 158,98 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 192,108 C 218,94 248,90 274,98 C 300,106 318,126 322,150
+             C 326,174 312,198 290,212 C 268,226 238,228 212,218
+             C 186,208 168,188 165,165 C 162,142 170,120 192,108 Z`,
+    label: "France capétienne à son apogée — avant la Guerre de Cent Ans (1328)",
+    scale: "france"
+  },
+
+  // ── GUERRE DE CENT ANS ──
+  1360: {
+    main: `M 158,98 C 172,84 195,74 220,70 C 245,66 272,70 294,82
+           C 318,94 336,115 345,140 C 354,165 352,194 340,220
+           C 328,246 306,268 280,282 C 254,296 224,302 193,298
+           C 162,294 132,282 108,260 C 84,238 68,208 62,175
+           C 56,142 62,108 78,82 C 95,56 120,40 148,38 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: `M 85,80 C 105,68 128,60 152,58 C 176,56 200,62 220,74
+            C 240,86 254,104 256,122 C 258,140 248,158 230,168
+            C 212,178 188,182 165,178 C 142,174 120,163 105,148
+            C 90,133 82,114 85,97 Z
+            M 110,280 C 118,268 130,260 145,258 C 160,256 175,262 185,272
+            C 195,282 198,296 192,308 C 186,320 172,326 157,325
+            C 142,324 128,316 120,305 C 112,294 108,285 110,280 Z
+            M 150,310 C 160,298 178,292 198,295 C 218,298 234,310 240,325
+            C 246,340 240,358 225,365 C 210,372 190,368 175,358
+            C 160,348 150,330 150,318 Z`,
+    ally: "",
+    domain: `M 215,130 C 235,118 258,115 278,122 C 298,129 310,146 310,165
+             C 310,184 298,202 278,212 C 258,222 232,222 212,212
+             C 192,202 180,182 182,162 C 184,142 198,130 215,130 Z`,
+    label: "Traité de Brétigny — un tiers de la France à l'Angleterre (1360)",
+    scale: "france"
+  },
+
+  1429: {
+    main: `M 158,98 C 172,84 195,74 220,70 C 245,66 272,70 294,82
+           C 318,94 336,115 345,140 C 354,165 352,194 340,220
+           C 328,246 306,268 280,282 C 254,296 224,302 193,298
+           C 162,294 132,282 108,260 C 84,238 68,208 62,175
+           C 56,142 62,108 78,82 C 95,56 120,40 148,38 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: `M 165,78 C 185,65 210,58 235,60 C 260,62 282,74 294,92
+            C 306,110 305,132 292,148 C 278,164 255,172 230,171
+            C 205,170 182,158 168,140 C 154,122 150,100 165,85 Z
+            M 212,160 C 230,148 252,144 272,150 C 292,156 305,172 302,190
+            C 299,208 282,222 260,225 C 238,228 216,220 205,206
+            C 194,192 196,172 212,160 Z`,
+    ally: `M 295,80 C 312,72 332,68 350,72 C 368,76 382,88 386,104
+           C 390,120 382,138 366,148 C 350,158 328,161 308,155
+           C 288,149 272,136 268,120 C 264,104 275,87 295,80 Z`,
+    domain: `M 230,222 C 248,212 268,210 285,218 C 302,226 312,242 308,260
+             C 304,278 286,292 265,295 C 244,298 222,288 212,272
+             C 202,256 205,238 230,222 Z`,
+    label: "Jeanne d'Arc — zones d'occupation anglaise et bourguignonne (1429)",
+    scale: "france"
+  },
+
+  1453: {
+    main: `M 158,98 C 172,84 195,74 220,70 C 245,66 272,70 294,82
+           C 318,94 336,115 345,140 C 354,165 352,194 340,220
+           C 328,246 306,268 280,282 C 254,296 224,302 193,298
+           C 162,294 132,282 108,260 C 84,238 68,208 62,175
+           C 56,142 62,108 78,82 C 95,56 120,40 148,38 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: `M 228,100 C 240,92 254,88 266,92 C 278,96 286,106 284,118
+            C 282,130 270,138 255,138 C 240,138 226,130 220,118
+            C 214,106 218,104 228,100 Z`,
+    ally: "",
+    domain: `M 192,108 C 218,94 248,90 274,98 C 300,106 318,126 322,150
+             C 326,174 312,198 290,212 C 268,226 238,228 212,218
+             C 186,208 168,188 165,165 C 162,142 170,120 192,108 Z`,
+    label: "Victoire finale — seul Calais reste anglais (1453)",
+    scale: "france"
+  },
+
+  // ── VALOIS — Renaissance ──
+  1515: {
+    main: `M 155,95 C 170,80 195,70 222,67 C 250,64 278,70 300,85
+           C 325,100 342,122 350,150 C 358,178 354,208 340,234
+           C 326,260 302,280 274,292 C 246,304 215,308 183,302
+           C 151,296 120,280 96,255 C 72,230 56,196 52,160
+           C 48,124 60,88 82,65 C 104,42 135,34 162,40
+           C 175,44 165,72 162,90 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: `M 410,178 C 425,168 442,165 458,170 C 474,175 484,188 480,202
+           C 476,216 460,224 443,222 C 426,220 412,210 408,196 Z`,
+    domain: `M 188,102 C 215,88 246,85 272,95 C 298,105 315,126 318,152
+             C 321,178 306,202 282,215 C 258,228 228,228 202,215
+             C 176,202 160,180 158,155 C 156,130 165,110 188,102 Z`,
+    label: "François Ier — après la victoire de Marignan (1515)",
+    scale: "france"
+  },
+
+  1598: {
+    main: `M 155,95 C 170,80 195,70 222,67 C 250,64 278,70 300,85
+           C 325,100 342,122 350,150 C 358,178 354,208 340,234
+           C 326,260 302,280 274,292 C 246,304 215,308 183,302
+           C 151,296 120,280 96,255 C 72,230 56,196 52,160
+           C 48,124 60,88 82,65 C 104,42 135,34 162,40 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: `M 185,82 C 198,72 215,68 230,72 C 245,76 255,88 250,102
+           C 245,116 228,124 210,122 C 192,120 178,110 178,97 Z
+           M 125,250 C 138,242 154,240 168,246 C 182,252 190,265 186,278
+           C 182,291 168,298 152,296 C 136,294 124,282 124,268 Z
+           M 215,278 C 225,270 240,268 252,274 C 264,280 270,294 265,306
+           C 260,318 246,324 231,320 C 216,316 206,304 208,292 Z`,
+    domain: `M 188,102 C 215,88 246,85 272,95 C 298,105 315,126 318,152
+             C 321,178 306,202 282,215 C 258,228 228,228 202,215
+             C 176,202 160,180 158,155 C 156,130 165,110 188,102 Z`,
+    label: "Henri IV — Édit de Nantes, places protestantes (1598)",
+    scale: "france"
+  },
+
+  // ── BOURBONS ──
+  1643: {
+    main: `M 152,92 C 168,76 195,66 225,63 C 255,60 285,66 308,82
+           C 335,98 352,122 358,152 C 364,182 358,214 342,242
+           C 326,270 300,292 268,305 C 236,318 200,320 165,310
+           C 130,300 98,278 74,248 C 50,218 36,180 36,142
+           C 36,104 52,68 80,48 C 108,28 145,26 172,40 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: `M 360,148 C 375,138 395,135 412,142 C 429,149 438,164 432,178
+           C 426,192 408,200 389,198 C 370,196 355,184 352,170 Z`,
+    domain: `M 185,100 C 212,85 244,82 270,93 C 296,104 314,128 315,155
+             C 316,182 300,208 274,220 C 248,232 215,230 190,215
+             C 165,200 150,176 150,150 C 150,124 162,108 185,100 Z`,
+    label: "Louis XIII / Richelieu — France grande puissance (1643)",
+    scale: "france"
+  },
+
+  1715: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Louis XIV — apogée territorial de la France (1715)",
+    scale: "france"
+  },
+
+  1789: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Veille de la Révolution — frontières de l'Ancien Régime (1789)",
+    scale: "france"
+  },
+
+  // ── EMPIRE NAPOLÉONIEN ──
+  1811: {
+    main: `M 55,32 C 90,18 135,10 182,8 C 229,6 278,10 325,20
+           C 372,30 416,46 455,68 C 494,90 525,118 545,150
+           C 565,182 572,218 565,255 C 558,292 538,328 510,358
+           C 482,388 446,412 405,430 C 364,448 318,460 270,465
+           C 222,470 172,468 125,458 C 78,448 35,430 5,405
+           C -25,380 -40,348 -38,315 C -36,282 -16,250 12,222
+           C 38,195 72,172 92,148 C 108,128 108,102 102,78
+           C 96,54 68,44 55,32 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: `M 22,312 C 42,298 68,292 95,298 C 122,304 145,320 155,340
+           C 165,360 158,382 140,392 C 122,402 98,398 76,382
+           C 54,366 35,342 28,320 Z
+           M 415,210 C 435,198 458,195 478,205 C 498,215 508,235 500,255
+           C 492,275 468,285 442,280 C 416,275 398,258 398,238 Z`,
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Empire napoléonien à son apogée — de Madrid à Moscou (1811)",
+    scale: "europe"
+  },
+
+  // ── RESTAURATION ──
+  1815: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Restauration — retour aux frontières de 1792 (1815)",
+    scale: "france"
+  },
+
+  // ── IIIe RÉPUBLIQUE ──
+  1870: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: `M 390,108 C 405,98 422,95 438,100 C 454,105 462,118 458,132
+            C 454,146 438,155 421,154 C 404,153 390,143 386,130
+            C 382,117 382,114 390,108 Z`,
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "IIIe République — perte de l'Alsace-Lorraine après Sedan (1870)",
+    scale: "france"
+  },
+
+  1918: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Après la Grande Guerre — Alsace-Lorraine recouvrée (1918)",
+    scale: "france"
+  },
+
+  1958: {
+    main: `M 148,88 C 165,72 194,62 226,59 C 258,56 292,64 316,82
+           C 342,100 358,126 362,158 C 366,190 356,224 336,252
+           C 316,280 286,302 252,313 C 218,324 180,324 144,310
+           C 108,296 75,270 52,236 C 29,202 18,160 22,120
+           C 26,80 46,44 76,26 C 106,8 145,8 172,22 Z
+           M 68,195 C 55,190 40,188 28,192 C 16,196 10,208 16,222
+           C 22,236 38,242 55,236 C 72,230 80,218 74,206 Z`,
+    enemy: "",
+    ally: "",
+    domain: `M 182,98 C 210,82 244,79 272,92 C 300,105 316,132 315,162
+             C 314,192 296,218 268,230 C 240,242 205,238 180,220
+             C 155,202 142,175 145,148 C 148,121 162,106 182,98 Z`,
+    label: "Ve République — France métropolitaine actuelle (1958)",
+    scale: "france"
+  },
 };
 
-// Battles with approximate SVG coordinates
+// ── BATTLE COORDINATES (calibrated to real map viewBox 700×620) ──
 const BATTLE_COORDS = {
-  tolbiac:      {x:382,y:88,  win:true},
-  vouille:      {x:140,y:298, win:true},
-  poitiers_732: {x:142,y:268, win:true},
-  roncevaux:    {x:118,y:408, win:false},
-  bouvines:     {x:262,y:88,  win:true},
-  crecy:        {x:208,y:105, win:false},
-  poitiers:     {x:145,y:268, win:false},
-  azincourt:    {x:215,y:108, win:false},
-  orleans:      {x:205,y:198, win:true},
-  castillon:    {x:118,y:322, win:true},
-  marignan:     {x:445,y:188, win:true},
-  pavie:        {x:440,y:192, win:false},
-  ivry:         {x:195,y:152, win:true},
-  la_rochelle:  {x:108,y:278, win:false},
-  rocroi:       {x:248,y:98,  win:true},
-  fontenoy:     {x:255,y:98,  win:true},
-  austerlitz:   {x:472,y:175, win:true},
-  iena:         {x:385,y:145, win:true},
-  borodino:     {x:498,y:108, win:false},
-  waterloo:     {x:255,y:98,  win:false},
-  sedan:        {x:248,y:102, win:false},
-  verdun:       {x:265,y:132, win:true},
-  marne_1914:   {x:228,y:148, win:true},
+  tolbiac:      {x:472, y:148, win:true},
+  vouille:      {x:162, y:298, win:true},
+  poitiers_732: {x:168, y:280, win:true},
+  roncevaux:    {x:130, y:412, win:false},
+  bouvines:     {x:305, y:118, win:true},
+  crecy:        {x:255, y:118, win:false},
+  poitiers:     {x:168, y:278, win:false},
+  azincourt:    {x:258, y:115, win:false},
+  orleans:      {x:258, y:215, win:true},
+  castillon:    {x:138, y:335, win:true},
+  marignan:     {x:492, y:275, win:true},
+  pavie:        {x:485, y:280, win:false},
+  ivry:         {x:228, y:158, win:true},
+  la_rochelle:  {x:122, y:285, win:false},
+  rocroi:       {x:302, y:108, win:true},
+  fontenoy:     {x:298, y:112, win:true},
+  austerlitz:   {x:565, y:182, win:true},
+  iena:         {x:440, y:148, win:true},
+  borodino:     {x:638, y:105, win:false},
+  waterloo:     {x:302, y:112, win:false},
+  sedan:        {x:298, y:108, win:false},
+  verdun:       {x:320, y:140, win:true},
+  marne_1914:   {x:278, y:155, win:true},
 };
 
 // ── EPOCH CHIPS ──
 const EPOCHS = [
   {label:'Mérovingiens', year:481},
-  {label:'Charlemagne', year:800},
-  {label:'Capétiens', year:987},
-  {label:'Cent Ans', year:1429},
-  {label:'Renaissance', year:1515},
-  {label:'Bourbons', year:1643},
-  {label:'Révolution', year:1789},
-  {label:'Empire', year:1811},
-  {label:'Restauration', year:1815},
-  {label:'IIIe Rép.', year:1870},
-  {label:'Libération', year:1944},
+  {label:'Charlemagne',  year:800},
+  {label:'Capétiens',    year:987},
+  {label:'Cent Ans',     year:1429},
+  {label:'Renaissance',  year:1515},
+  {label:'Richelieu',    year:1643},
+  {label:'Révolution',   year:1789},
+  {label:'Empire',       year:1811},
+  {label:'1870',         year:1870},
+  {label:'1918',         year:1918},
+  {label:'Ve Rép.',      year:1958},
 ];
 
+// ── UTILS ──
+function getClosestTerritory(year){
+  const keys = Object.keys(TERRITORIES).map(Number).sort((a,b)=>a-b);
+  let closest = keys[0];
+  for(const k of keys){ if(k<=year) closest=k; else break; }
+  return TERRITORIES[closest];
+}
+
+// ── EPOCH CHIPS BUILD ──
 function buildEpochChips(){
   const el = document.getElementById('epochChips');
   EPOCHS.forEach(e=>{
@@ -380,15 +930,25 @@ function buildEpochChips(){
     btn.className='epoch-chip';
     btn.textContent=e.label;
     btn.dataset.year=e.year;
-    btn.addEventListener('click',()=>{ setYear(e.year); updateActiveChip(e.year); });
+    btn.addEventListener('click',()=>{ setYear(e.year); });
     el.appendChild(btn);
   });
 }
 
 function updateActiveChip(year){
+  const terr = getClosestTerritory(year);
   document.querySelectorAll('.epoch-chip').forEach(c=>{
-    c.classList.toggle('active', parseInt(c.dataset.year)===year || EPOCHS.find(e=>e.year===year && e.label===c.textContent));
+    const cy = parseInt(c.dataset.year);
+    c.classList.toggle('active', cy === parseInt(Object.keys(TERRITORIES).find(k=>getClosestTerritory(year)===TERRITORIES[k])));
   });
+  // simpler: highlight chip closest to year
+  let best=null, bestDist=99999;
+  document.querySelectorAll('.epoch-chip').forEach(c=>{
+    const d = Math.abs(parseInt(c.dataset.year)-year);
+    if(d<bestDist){ bestDist=d; best=c; }
+  });
+  document.querySelectorAll('.epoch-chip').forEach(c=>c.classList.remove('active'));
+  if(best) best.classList.add('active');
 }
 
 // ── MAIN UPDATE ──
@@ -399,6 +959,7 @@ function setYear(year){
   updateYearOverlay(currentYear);
   updateMap(currentYear);
   updateInfoPanel(currentYear);
+  updateActiveChip(currentYear);
 }
 
 function onSlider(v){ setYear(parseInt(v)); }
@@ -417,122 +978,151 @@ function updateYearOverlay(year){
   document.getElementById('dynastyOverlay').textContent = rois.length ? `Règne de ${rois[0].nom}` : '';
 }
 
-function getClosestTerritory(year){
-  const keys = Object.keys(TERRITORIES).map(Number).sort((a,b)=>a-b);
-  let closest = keys[0];
-  for(const k of keys){ if(k <= year) closest = k; else break; }
-  return TERRITORIES[closest];
-}
-
 function updateMap(year){
   const terr = getClosestTerritory(year);
   const dyn = HISTORIA.utils.getDynastieParAnnee(year);
   const dynColor = dyn ? dyn.couleur : '#C9A84C';
 
-  // Update territory paths
-  document.getElementById('territory-main').setAttribute('d', terr.main||'');
-  document.getElementById('territory-main').setAttribute('fill', dynColor+'22');
-  document.getElementById('territory-main').setAttribute('stroke', dynColor+'88');
-  document.getElementById('territory-main').setAttribute('opacity', terr.main?'1':'0');
+  // Territory overlay
+  const tm = document.getElementById('territory-main');
+  tm.setAttribute('d', terr.main||'');
+  tm.setAttribute('fill', hexToRgba(dynColor, 0.15));
+  tm.setAttribute('stroke', hexToRgba(dynColor, 0.65));
+  tm.setAttribute('opacity', terr.main?'1':'0');
 
-  document.getElementById('territory-enemy').setAttribute('d', terr.enemy||'');
-  document.getElementById('territory-enemy').setAttribute('opacity', terr.enemy?'1':'0');
+  // Enemy zones
+  const te = document.getElementById('territory-enemy');
+  te.setAttribute('d', terr.enemy||'');
+  te.setAttribute('opacity', terr.enemy?'1':'0');
 
-  document.getElementById('territory-ally').setAttribute('d', terr.ally||'');
-  document.getElementById('territory-ally').setAttribute('opacity', terr.ally?'1':'0');
+  // Ally zones
+  const ta = document.getElementById('territory-ally');
+  ta.setAttribute('d', terr.ally||'');
+  ta.setAttribute('opacity', terr.ally?'1':'0');
 
-  document.getElementById('domain-royal').setAttribute('d', terr.domain||'');
-  document.getElementById('domain-royal').setAttribute('fill', dynColor+'55');
-  document.getElementById('domain-royal').setAttribute('stroke', dynColor);
-  document.getElementById('domain-royal').setAttribute('opacity', terr.domain?'0.85':'0');
+  // Domain royal
+  const dr = document.getElementById('domain-royal');
+  dr.setAttribute('d', terr.domain||'');
+  dr.setAttribute('fill', hexToRgba(dynColor, 0.38));
+  dr.setAttribute('stroke', hexToRgba(dynColor, 0.95));
+  dr.setAttribute('opacity', terr.domain?'1':'0');
 
-  // France base color
-  document.getElementById('france-base-path').setAttribute('fill', dynColor+'18');
+  // France base tint
+  document.getElementById('france-base').setAttribute('fill', hexToRgba(dynColor, 0.06));
 
-  // Update battle markers (show relevant battles ±50 years)
+  // Territory label
+  document.getElementById('terrLabel').textContent = terr.label || '';
+
+  // Battle markers
   updateBattleMarkers(year);
+}
+
+function hexToRgba(hex, alpha){
+  if(!hex || !hex.startsWith('#')) return `rgba(201,168,76,${alpha})`;
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `rgba(${r},${g},${b},${alpha})`;
 }
 
 function updateBattleMarkers(year){
   const g = document.getElementById('battle-markers-group');
   g.innerHTML = '';
-  const visible = HISTORIA.batailles.filter(b => Math.abs(b.date - year) < 80);
+  const visible = HISTORIA.batailles.filter(b => Math.abs(b.date - year) < 85);
   visible.forEach(b=>{
     const coords = BATTLE_COORDS[b.id];
     if(!coords) return;
     const dist = Math.abs(b.date - year);
-    const opacity = Math.max(0.25, 1 - dist/80);
-    const col = coords.win ? '#C04030' : '#4A4A7A';
-    const size = 5 + b.importance;
+    const opacity = Math.max(0.2, 1 - dist/85).toFixed(2);
+    const col = coords.win ? '#C04030' : '#6060a0';
+    const size = 4 + b.importance * 1.2;
+    const half = size/2;
     g.innerHTML += `
       <g class="battle-pin" style="cursor:pointer;opacity:${opacity}"
-         onmouseenter="showMapTooltip(event,'${b.nom}','${b.date} — ${b.lieu}')"
-         onmouseleave="hideMapTooltip()">
-        <rect x="${coords.x - size/2}" y="${coords.y - size/2}" width="${size}" height="${size}"
+         onmouseenter="showTip(event,'${b.nom}','${b.date} — ${b.lieu}<br>${coords.win?'✓ Victoire':'✗ Défaite'} — vs ${b.perdant}')"
+         onmouseleave="hideTip()">
+        <rect x="${coords.x-half}" y="${coords.y-half}" width="${size}" height="${size}"
               transform="rotate(45,${coords.x},${coords.y})"
-              fill="${col}" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
-        ${dist < 15 ? `<text x="${coords.x+size+2}" y="${coords.y+3}" font-family="serif" font-size="8" fill="rgba(201,168,76,0.7)">${b.nom}</text>` : ''}
+              fill="${col}" stroke="rgba(255,255,255,0.25)" stroke-width="0.6"/>
+        ${dist < 20 ? `<text x="${coords.x+half+2}" y="${coords.y+3}" font-family="serif" font-size="7.5" fill="rgba(201,168,76,0.75)">${b.nom}</text>` : ''}
       </g>`;
   });
 }
+
+// ── TOOLTIP ──
+function showTip(e, name, meta){
+  const tt = document.getElementById('mapTooltip');
+  const stage = document.getElementById('mapStage');
+  const rect = stage.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  document.getElementById('tt-name').textContent = name;
+  document.getElementById('tt-meta').innerHTML = meta;
+  tt.style.left = x+'px';
+  tt.style.top = y+'px';
+  tt.classList.add('show');
+}
+function hideTip(){ document.getElementById('mapTooltip').classList.remove('show'); }
 
 // ── INFO PANEL ──
 function updateInfoPanel(year){
   const dyn = HISTORIA.utils.getDynastieParAnnee(year);
   const rois = HISTORIA.utils.getRoisParAnnee(year);
 
-  // Context tab
   document.getElementById('ctx-year').textContent = year;
   document.getElementById('ctx-dyn').textContent = dyn ? dyn.nom : '';
   document.getElementById('ctx-desc').textContent = dyn ? dyn.description : '';
 
-  // Rulers
-  const rulersEl = document.getElementById('ctx-rulers');
-  rulersEl.innerHTML = rois.length ? rois.map(r=>`
+  // Rulers avec portraits
+  document.getElementById('ctx-rulers').innerHTML = rois.length ? rois.map(r=>`
     <a href="roi.html?id=${r.id}" class="info-ruler-row">
-      <span class="info-ruler-emoji">${r.portrait_emoji||'👑'}</span>
+      ${r.portrait_url
+        ? `<img src="${r.portrait_url}" class="ruler-portrait" alt="${r.nom}" onerror="this.style.display='none'">`
+        : `<div class="ruler-portrait-placeholder">${r.portrait_emoji||'👑'}</div>`}
       <div>
         <span class="info-ruler-name">${r.nom}${r.surnom?' — '+r.surnom:''}</span>
         <span class="info-ruler-dates">Règne : ${r.debut_regne}–${r.fin_regne||'?'}</span>
       </div>
-    </a>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.6">Aucun souverain identifié.</p>';
+    </a>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.5">Aucun souverain identifié.</p>';
 
-  // Events near this year
+  // Events
   const evts = HISTORIA.evenements.filter(e=>Math.abs(e.date-year)<30).slice(0,4);
-  const evtsEl = document.getElementById('ctx-events');
-  evtsEl.innerHTML = evts.length ? evts.map(e=>`
-    <div style="padding:.5rem .7rem;margin-bottom:.4rem;background:rgba(201,168,76,.04);border-left:2px solid rgba(201,168,76,.2)">
+  document.getElementById('ctx-events').innerHTML = evts.length ? evts.map(e=>`
+    <div style="padding:.45rem .6rem;margin-bottom:.4rem;background:rgba(201,168,76,.04);border-left:2px solid rgba(201,168,76,.2)">
       <div style="font-family:Cinzel,serif;font-size:9px;color:var(--gold-dim);letter-spacing:2px">${e.date}</div>
       <div style="font-size:13px;color:var(--parchment-dim);margin-top:2px">${e.titre}</div>
-    </div>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.5">Aucun événement proche.</p>';
+    </div>`).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.45">Aucun événement proche.</p>';
 
-  // Battles tab
-  const bats = HISTORIA.batailles.filter(b=>Math.abs(b.date-year)<60).sort((a,b)=>Math.abs(a.date-year)-Math.abs(b.date-year));
+  // Battles
+  const bats = HISTORIA.batailles.filter(b=>Math.abs(b.date-year)<70).sort((a,b)=>Math.abs(a.date-year)-Math.abs(b.date-year));
   document.getElementById('bat-list').innerHTML = bats.length ? bats.map(b=>{
     const stars = '<span class="battle-star">★</span>'.repeat(b.importance);
-    return `<div class="battle-entry" onclick="">
-      <div class="battle-entry-name">⚔ ${b.nom} <span class="battle-importance">${stars}</span></div>
-      <div class="battle-entry-meta">${b.date} · ${b.lieu}<br>${b.vainqueur} vs ${b.perdant}</div>
+    const win = BATTLE_COORDS[b.id]?.win;
+    return `<div class="battle-entry">
+      <div class="battle-entry-name">${win?'⚔':'☠'} ${b.nom} <span class="battle-importance">${stars}</span></div>
+      <div class="battle-entry-meta">${b.date} · ${b.lieu}<br>${b.vainqueur} bat ${b.perdant}</div>
     </div>`;
-  }).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.5;padding:.5rem">Aucune bataille dans cette période.</p>';
+  }).join('') : '<p style="font-size:13px;color:var(--parchment-dim);opacity:.45;padding:.5rem">Aucune bataille dans cette période.</p>';
 
-  // Territory tab
+  // Territory info
   const terr = getClosestTerritory(year);
   document.getElementById('terr-info').innerHTML = `
-    <div class="terr-card"><span class="terr-card-label">SITUATION</span><span class="terr-card-value">${terr.label||'—'}</span></div>
-    ${dyn?`<div class="terr-card"><span class="terr-card-label">DYNASTY</span><span class="terr-card-value">${dyn.nom} (${dyn.debut}–${dyn.fin===9999?'présent':dyn.fin})</span></div>`:''}
-    <div class="terr-card"><span class="terr-card-label">TERRITOIRE ENNEMI</span><span class="terr-card-value" style="color:rgba(200,80,80,.8)">${terr.enemy?'Zones d\'occupation présentes':'Territoire sécurisé'}</span></div>
-    <div class="terr-card"><span class="terr-card-label">ALLIÉS / VASSAUX</span><span class="terr-card-value" style="color:rgba(74,122,181,.8)">${terr.ally?'Présents':'Aucun affiché'}</span></div>`;
+    <div class="terr-card"><span class="terr-card-label">SITUATION TERRITORIALE</span><span class="terr-card-value">${terr.label||'—'}</span></div>
+    ${dyn?`<div class="terr-card"><span class="terr-card-label">RÉGIME</span><span class="terr-card-value">${dyn.nom} (${dyn.debut}–${dyn.fin===9999?'présent':dyn.fin})</span></div>`:''}
+    <div class="terr-card"><span class="terr-card-label">ZONES ENNEMIES</span><span class="terr-card-value" style="color:${terr.enemy?'rgba(220,80,60,.9)':'var(--parchment-dim)'}">${terr.enemy?'Présentes sur la carte':'Territoire sécurisé'}</span></div>
+    <div class="terr-card"><span class="terr-card-label">ALLIÉS / VASSAUX</span><span class="terr-card-value" style="color:${terr.ally?'rgba(74,122,181,.9)':'var(--parchment-dim)'}">${terr.ally?'Représentés en bleu':'Aucun affiché'}</span></div>`;
 }
 
 // ── COMPARE ──
 function compareYears(){
-  const y1 = parseInt(document.getElementById('cmp-year1').value)||987;
-  const y2 = parseInt(document.getElementById('cmp-year2').value)||1643;
-  const d1 = HISTORIA.utils.getDynastieParAnnee(y1);
-  const d2 = HISTORIA.utils.getDynastieParAnnee(y2);
-  const r1 = HISTORIA.utils.getRoisParAnnee(y1)[0];
-  const r2 = HISTORIA.utils.getRoisParAnnee(y2)[0];
+  const y1=parseInt(document.getElementById('cmp-year1').value)||987;
+  const y2=parseInt(document.getElementById('cmp-year2').value)||1643;
+  const d1=HISTORIA.utils.getDynastieParAnnee(y1);
+  const d2=HISTORIA.utils.getDynastieParAnnee(y2);
+  const r1=HISTORIA.utils.getRoisParAnnee(y1)[0];
+  const r2=HISTORIA.utils.getRoisParAnnee(y2)[0];
+  const t1=getClosestTerritory(y1);
+  const t2=getClosestTerritory(y2);
   document.getElementById('compare-result').innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem">
       <div class="terr-card" style="border-left:3px solid ${d1?.couleur||'var(--gold)'}">
@@ -544,53 +1134,41 @@ function compareYears(){
         <span class="terr-card-value">${d2?.nom||'?'}<br><small style="opacity:.6">${r2?r2.nom:'?'}</small></span>
       </div>
     </div>
-    <p style="font-size:13px;color:var(--parchment-dim);margin-top:.75rem;line-height:1.5">
+    <p style="font-size:13px;color:var(--parchment-dim);margin-top:.65rem;line-height:1.55">
       Entre <strong style="color:var(--gold)">${y1}</strong> et <strong style="color:var(--gold)">${y2}</strong>, 
-      soit <strong style="color:var(--gold)">${Math.abs(y2-y1)} ans</strong> d'histoire française.
-      ${d1?.id!==d2?.id?`La France passe de la ${d1?.nom||'?'} à la ${d2?.nom||'?'}.`:'La même dynastie règne.'}
+      soit <strong style="color:var(--gold)">${Math.abs(y2-y1)} ans</strong> d'histoire.
+      ${d1?.id!==d2?.id?`La France passe de <em>${d1?.nom||'?'}</em> à <em>${d2?.nom||'?'}</em>.`:'Même régime aux deux époques.'}
     </p>`;
 }
 
 // ── TABS ──
 function switchTab(name, btn){
-  activeTab = name;
   document.querySelectorAll('.info-section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.info-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   btn.classList.add('active');
 }
 
-// ── TOOLTIP ──
-function showMapTooltip(e, name, meta){
-  const tt = document.getElementById('mapTooltip');
-  document.getElementById('tt-name').textContent = name;
-  document.getElementById('tt-meta').textContent = meta;
-  tt.style.left = (e.offsetX||100)+'px';
-  tt.style.top = (e.offsetY||100)+'px';
-  tt.classList.add('show');
-}
-function hideMapTooltip(){ document.getElementById('mapTooltip').classList.remove('show'); }
-
-// ── PLAY ANIMATION ──
+// ── PLAY ──
 function togglePlay(){
-  isPlaying = !isPlaying;
-  const btn = document.getElementById('playBtn');
+  isPlaying=!isPlaying;
+  const btn=document.getElementById('playBtn');
   if(isPlaying){
-    btn.textContent = '⏸';
-    playInterval = setInterval(()=>{
-      if(currentYear >= 1969){ clearInterval(playInterval); isPlaying=false; btn.textContent='▶'; return; }
-      setYear(currentYear + 5);
-    }, 120);
+    btn.textContent='⏸';
+    playInterval=setInterval(()=>{
+      if(currentYear>=1969){ clearInterval(playInterval); isPlaying=false; btn.textContent='▶'; return; }
+      setYear(currentYear+5);
+    },100);
   } else {
     clearInterval(playInterval);
-    btn.textContent = '▶';
+    btn.textContent='▶';
   }
 }
 
 // ── KEYBOARD ──
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight') setYear(currentYear+10);
-  if(e.key==='ArrowLeft') setYear(currentYear-10);
+  if(e.key==='ArrowLeft')  setYear(currentYear-10);
   if(e.key===' '){ e.preventDefault(); togglePlay(); }
 });
 
